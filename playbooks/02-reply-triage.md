@@ -40,7 +40,7 @@ Input: one or more `email_id` values. Each is the Instantly id of the message to
 8. **On `Send` or `Edit`:**
    1. Reopen the thread. If the lead wrote again, redraft from the newest message and post a fresh card.
    2. Send from the mailbox that received the message, with `reply_to_uuid` = that message's `email_id`, subject `Re: <subject>`
-      (do not stack a second `Re:`), plain text body signed with `sender.signature`.
+      (do not stack a second `Re:`), plain text body signed with `sender.signature`. If that is `{sending_account_name}`, sign with the first and last name set on the mailbox that received the message (its account in Instantly). If that mailbox has no name, do not guess one from the address: say so on the card and ask.
       The action is the matching approval: send_reply_question, send_reply_objection, send_reply_not_now, send_reply_referral
       (or send_reply_interested for a non-slot answer to an interested lead).
    3. Mark the thread read (approval: mark_thread_read). Update `logs/pending.md`, `logs/replies.md`.

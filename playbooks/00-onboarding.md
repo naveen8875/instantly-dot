@@ -58,7 +58,7 @@ Setup form. Reply in one message, one line per number. Leave a line blank to fil
 4. Client name (or your own company):
 5. Which campaigns belong to this client? (from Instantly)
      1) <name> (Active)   2) <name> (Draft)   ...      e.g. "1,3" or "all"
-6. Name your replies are signed with (default: your name):
+6. Name your replies are signed with (default: the sending account's name, so each reply is signed by the mailbox it goes from):
 7. What you ask for (default: a 20-minute call):
 8. Your booking link (https://...):
 9. Video call link (default: the booking link):
@@ -95,6 +95,7 @@ Never push config straight to the main branch.
 ### 7. Check what you made
 
 - Read every file back. Every `REPLACE_ME` that is left must be a value you could not get, and you must say which.
+- With the default sign-off, check that each chosen mailbox has a first and last name set in Instantly. Say which ones do not: replies from those cannot be signed until the owner sets a name or gives a fixed one.
 - If you can run Node and the instructions folder has `package.json`: `npm install`, then `node scripts/validate.mjs --data <data folder>`. Fix every error. Warnings are fine in `dry_run`.
 - If you cannot run it, check by hand against the rules in "How to fill" and say that you did not run the validator.
 
@@ -114,7 +115,7 @@ Copy the skeleton, then:
 - `agency.yaml`: `interface` is `chatgpt` or `slack`, `mode: dry_run`, `canary: "v1"`, `wake.primary: schedule_only`, the owner as the only approver, one client `{folder, active: true}`.
   For `interface: chatgpt` delete `agency.channels`, `agency.owner.slack_user`, every `approvers[].slack_user` and the whole `slack:` block.
 - `workspace.yaml`: `mode: dry_run`, `instantly.workspace_id` from whoami, `instantly.connection` the name of the Instantly connection you use, the chosen campaigns (`id`, `name`), the mailboxes,
-  `dot_sets_interest_status: true`, `sender`, `offer`, `calendar` (`calendar_id: "primary"`, `working_hours` weekdays 09:00 to 17:00, timezone from the form, `video_link`).
+  `dot_sets_interest_status: true`, `sender` (unless the owner gave a fixed name, leave the skeleton's default `{sending_account_name}` in both `display_name` and `signature`), `offer`, `calendar` (`calendar_id: "primary"`, `working_hours` weekdays 09:00 to 17:00, timezone from the form, `video_link`).
   For `interface: chatgpt` delete the whole `slack:` block. Keep the numbers (`limits`, `health`, `reporting`) as they are.
   `proof_points` is a list: `[]` if the owner gave none.
 - `icp.yaml`: one segment with `plain_language` from the form, `campaign_id` the first chosen campaign, `search_filters: {}`, `structure: "A"`, `personalization: "role-pain"`, and the other keys as in the skeleton.

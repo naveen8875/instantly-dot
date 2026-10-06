@@ -250,6 +250,10 @@ export function validateRepo(root, opts = {}) {
     }
 
     if (!nonEmpty(ws.sender?.display_name) || !nonEmpty(ws.sender?.signature)) err(f, 'sender.display_name and sender.signature are required');
+    for (const k of ['display_name', 'signature']) {
+      const bad = (typeof ws.sender?.[k] === 'string' ? ws.sender[k].match(/\{[^}]*\}/g) ?? [] : []).filter((x) => x !== '{sending_account_name}');
+      if (bad.length) err(f, `sender.${k} has an unknown placeholder ${bad[0]}: the only one allowed is {sending_account_name}`);
+    }
     if (!nonEmpty(ws.offer?.primary_cta)) err(f, 'offer.primary_cta is required');
     if (!/^https:\/\//.test(ws.offer?.calendar_link ?? '')) err(f, 'offer.calendar_link must be an https URL');
     const proof = ws.offer?.proof_points;

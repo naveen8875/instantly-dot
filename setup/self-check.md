@@ -18,7 +18,7 @@ It never messages a lead, never sends an email, never writes to Instantly. It po
 1. **Files.** `workspace.yaml`, `icp.yaml`, `voice.md`, `examples.md`, `learnings.md` read from the data folder. Empty example sections are listed (a warning in `dry_run`, a blocker when live).
 2. **Workspace.** whoami on the client's connection returns the `workspace_id` in `workspace.yaml`.
 3. **Campaigns.** Every campaign id resolves. Report each one's status and sending status.
-4. **Mailboxes.** Every mailbox in `workspace.yaml` exists in this workspace. Report HEALTHY, WATCH or RED for each. No other mailbox is touched.
+4. **Mailboxes.** Every mailbox in `workspace.yaml` exists in this workspace. Report HEALTHY, WATCH or RED for each, and whether each has a first and last name set (replies are signed with it by default). No other mailbox is touched.
 5. **Inbox.** One read-only list call returns the unread count for the client's campaigns.
 6. **Thread.** Fetch one recent message by id and show you can see the whole thread. If there is none yet, say so.
 7. **Reply tool.** Inspect the reply tool's inputs: it needs the sending mailbox, the id of the message being answered, a subject and a body. Do not call it.

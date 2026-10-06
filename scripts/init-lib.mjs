@@ -1,6 +1,8 @@
 import YAML from 'yaml';
 
 export const PLACEHOLDER = 'REPLACE_ME';
+// Default sign-off: the name set on the mailbox that sends the reply (Instantly's first_name and last_name on the account).
+export const SENDING_ACCOUNT = '{sending_account_name}';
 
 export function slugify(s) {
   return (
@@ -96,7 +98,7 @@ export function buildFiles(a, templates = {}) {
           },
         }
       : {}),
-    sender: { display_name: val(a.sender?.displayName || a.owner.name), signature: val(a.sender?.signature || a.sender?.displayName || a.owner.name) },
+    sender: { display_name: val(a.sender?.displayName || SENDING_ACCOUNT), signature: val(a.sender?.signature || a.sender?.displayName || SENDING_ACCOUNT) },
     offer: {
       primary_cta: val(a.offer?.cta || 'a 20-minute call'),
       calendar_link: calendarLink,
@@ -141,7 +143,7 @@ export function buildFiles(a, templates = {}) {
     [`${base}/workspace.yaml`]: header(`${clientName}: workspace`) + YAML.stringify(workspace),
     [`${base}/icp.yaml`]: header(`${clientName}: who to reach`) + YAML.stringify(icp),
     [`${base}/voice.md`]:
-      `# Client voice\n\nHard rules live in voice/tone.md. This file adds how this client sounds.\n\n- **Formality:** casual\n- **Greeting:** e.g. "Hey {first name},"\n- **Sign-off:** e.g. "Cheers, ${val(a.sender?.displayName || a.owner.name)}"\n- **Sentence length:** short and punchy\n- **Phrases they use:**\n- **Phrases they never use:**\n- **How they offer a call:** e.g. "Easiest is a quick 20 minutes, here are three times:"\n`,
+      `# Client voice\n\nHard rules live in voice/tone.md. This file adds how this client sounds.\n\n- **Formality:** casual\n- **Greeting:** e.g. "Hey {first name},"\n- **Sign-off:** e.g. "Cheers, ${a.sender?.displayName && a.sender.displayName !== SENDING_ACCOUNT ? a.sender.displayName : "the sending account's name"}"\n- **Sentence length:** short and punchy\n- **Phrases they use:**\n- **Phrases they never use:**\n- **How they offer a call:** e.g. "Easiest is a quick 20 minutes, here are three times:"\n`,
     [`${base}/examples.md`]: stripComment(templates.examples) || '# Examples\n',
     [`${base}/learnings.md`]: templates.learnings ?? '# Learnings\n',
     [`${base}/logs/README.md`]: templates.logsReadme ?? '# logs/\n',

@@ -13,7 +13,7 @@ import { execSync } from 'node:child_process';
 import readline from 'node:readline/promises';
 import { fileURLToPath } from 'node:url';
 import { validateRepo } from './validate-lib.mjs';
-import { buildFiles, lookupInstantly, campaignLabel, renderBootstrap, slugify } from './init-lib.mjs';
+import { buildFiles, lookupInstantly, campaignLabel, renderBootstrap, slugify, SENDING_ACCOUNT } from './init-lib.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const args = process.argv.slice(2);
@@ -171,7 +171,8 @@ async function main() {
   }
 
   const connection = await ask('Name of the Instantly connection in ChatGPT for this workspace:', `${clientName} Instantly`);
-  const displayName = await ask('Name replies are signed with:', ownerName);
+  const signAs = await ask("Name replies are signed with (Enter = the name set on the sending mailbox, which is the default):");
+  const displayName = signAs || SENDING_ACCOUNT;
   const cta = await ask('What do you ask for?', 'a 20-minute call');
   const calendarLink = await ask('Your booking link (https://...):');
   const videoLink = await ask('Video call link (Enter = same as the booking link):', calendarLink);

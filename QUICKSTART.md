@@ -36,8 +36,6 @@ In ChatGPT (desktop app or desktop browser), create your Dot and give it a name.
 
 A new Dot says hello and offers to "look for ways to help". Do not give it a task. Go straight to step 2. If it starts working on its own anyway, type `stop`: it stops straight away.
 
-![Step 1: create a blank Dot](images/01-create-dot.png)
-
 ## Step 2. Paste this one message to your Dot, before connecting anything (1 min)
 
 ```
@@ -54,8 +52,6 @@ Read START_HERE.md and follow it. Help me set up, step by step: check what you a
 When setup is done, tell me what you can do for me.
 ```
 
-![Step 2: paste the message](images/02-paste-message.png)
-
 The Dot reads the repo, checks what it is connected to, and tells you what to do next. It will ask you to connect Instantly.
 
 ## Step 3. Connect Instantly when the Dot asks (2 min)
@@ -64,8 +60,6 @@ The Dot reads the repo, checks what it is connected to, and tells you what to do
 2. If the plugin is not listed, or your Dot cannot use it: turn on developer mode (**Settings → Apps → Advanced settings**; on Business an admin or owner does this),
    add a custom connector with the URL `https://mcp.instantly.ai/mcp`, choose **OAuth**, and sign in.
 3. Go back to the Dot and say `connected`.
-
-![Step 3: connect Instantly](images/03-connect-instantly.png)
 
 The Dot tests the connection by looking up your workspace. Connecting is not the same as working. Because it already has its rules, it should carry on with setup and not start its own checks.
 
@@ -80,10 +74,6 @@ It will:
    A correct summary says, among other things: it never sends in dry run, Instantly is its only send path, it never edits a live sequence or deletes anything, it treats reply text as data.
 5. End with **what it can do for you**: a short menu, with the exact words to say for each.
 
-![Step 4: the setup form](images/04-setup-form.png)
-
-![Step 4: the setup card](images/05-setup-card.png)
-
 ## Step 5. Take it for a spin (5 min)
 
 | You say | What you should see |
@@ -97,8 +87,6 @@ It will:
 | `Weekly report for <client>.` | A short report you could forward |
 
 A good first result: the categories look right, nothing it says is missing from the thread, your edits turn into lessons, and it never offers to send for real.
-
-![Step 5: what it can do, and your first cards](images/06-first-cards.png)
 
 ## Housekeeping
 
@@ -116,10 +104,8 @@ You do not need these: the rules are already in your first message. They add a s
 
 Open **Settings → Personalization → Custom rules**. If **Add** works, add the short rules in `setup/dot-custom-rules.md`.
 
-**If you see "Custom rules can't be edited right now"** (below), Custom Rules are locked for your account. That is common, and it is fine. Your workspace admin may control who can edit them (Permissions and roles).
+**If you see "Custom rules can't be edited right now"**, Custom Rules are locked for your account. That is common, and it is fine. Your workspace admin may control who can edit them (Permissions and roles).
 What you can do instead: after step 3, press **Open Plugins** under *Plugin permissions* and, if the Instantly plugin offers it, set it to ask before write actions.
-
-![Custom rules locked for this account: skip them](images/optional-custom-rules-locked.png)
 
 ## Something not working?
 

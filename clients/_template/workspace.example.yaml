@@ -21,9 +21,9 @@ slack:                              # slack only: delete this whole block for in
   alerts: "#REPLACE_ME-alerts"
   reports: "#REPLACE_ME-reports"
 
-sender:
-  display_name: "REPLACE_ME"        # who replies are signed as
-  signature: "REPLACE_ME"           # exact text appended to every reply
+sender:                             # default: sign each reply with the name set on the mailbox that sends it. Replace with fixed text to sign every reply the same way
+  display_name: "{sending_account_name}"
+  signature: "{sending_account_name}"   # {sending_account_name} = the first and last name set on the mailbox that received the message
 
 offer:
   primary_cta: "REPLACE_ME"         # e.g. "a 20-minute call"

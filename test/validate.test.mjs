@@ -294,6 +294,13 @@ test('interface slack still requires every channel and handle', () => {
   assert.ok(has(res, 'slack.alerts must be a channel name'));
 });
 
+test('the sending-account sign-off placeholder is allowed, any other placeholder is not', () => {
+  const ok = makeRepo({ tweak: ({ yaml }) => yaml('clients/acme-co/workspace.yaml', (d) => (d.sender = { display_name: '{sending_account_name}', signature: '{sending_account_name}' })) });
+  assert.deepEqual(validateRepo(ok.root).errors, []);
+  const bad = makeRepo({ tweak: ({ yaml }) => yaml('clients/acme-co/workspace.yaml', (d) => (d.sender.signature = 'Best, {first_name}')) });
+  assert.ok(has(validateRepo(bad.root), 'unknown placeholder {first_name}'));
+});
+
 test('bounce_warn must be lower than bounce_stop', () => {
   const { root } = makeRepo({ tweak: ({ yaml }) => yaml('clients/acme-co/workspace.yaml', (d) => (d.health.bounce_warn = 0.06)) });
   assert.ok(has(validateRepo(root), 'bounce_warn must be lower'));

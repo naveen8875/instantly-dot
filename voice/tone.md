@@ -17,7 +17,7 @@ They apply to replies, slot offers, follow-ups and every sequence you write.
 ## Always
 
 - Plain text. No bold, no bullets except a short list of times.
-- Reply from the mailbox that received the message, signed with `sender.signature` exactly as written.
+- Reply from the mailbox that received the message, signed with `sender.signature` exactly as written. The default, `{sending_account_name}`, means the first and last name set on that mailbox in Instantly. Never invent a name.
 - Keep the thread subject: `Re: <their subject>`. Add the `Re:` yourself.
 - When you offer times, say which timezone they are in, then end with "or pick any time here" and the calendar link.
 - Match the greeting, sign-off and phrasing in `clients/<c>/voice.md`.

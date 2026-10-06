@@ -139,3 +139,15 @@ test('lookupInstantly: errors are plain and never contain the key', async () => 
     );
   }
 });
+
+test('the reply sign-off defaults to the sending account\'s name, and a fixed name overrides it', () => {
+  const noSender = full();
+  delete noSender.sender;
+  const r = validateGenerated(noSender);
+  assert.deepEqual(r.errors, []);
+  assert.match(r.files['clients/acme-co/workspace.yaml'], /display_name: "?\{sending_account_name\}"?/);
+  assert.match(r.files['clients/acme-co/workspace.yaml'], /signature: "?\{sending_account_name\}"?/);
+  assert.match(r.files['clients/acme-co/voice.md'], /the sending account's name/);
+  const fixed = validateGenerated(full({ sender: { displayName: 'Sam Lee', signature: 'Sam Lee' } }));
+  assert.match(fixed.files['clients/acme-co/workspace.yaml'], /signature: Sam Lee/);
+});

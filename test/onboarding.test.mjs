@@ -141,3 +141,13 @@ test('the playbook forbids the dangerous things and every action it cites is rea
   assert.match(rd('START_HERE.md'), /Run `playbooks\/00-onboarding\.md` and nothing else/);
   assert.match(rd('START_HERE.md'), /Your two folders/);
 });
+
+test('the skeleton defaults to signing with the sending account\'s name, and the playbooks say how', () => {
+  const ws = parse('clients/_template/workspace.example.yaml');
+  assert.equal(ws.sender.display_name, '{sending_account_name}');
+  assert.equal(ws.sender.signature, '{sending_account_name}');
+  assert.match(PLAYBOOK, /default: the sending account's name/);
+  assert.match(PLAYBOOK, /\{sending_account_name\}/);
+  assert.match(rd('playbooks/02-reply-triage.md'), /\{sending_account_name\}/);
+  assert.match(rd('voice/tone.md'), /\{sending_account_name\}/);
+});

@@ -44,31 +44,18 @@ test('the first message carries the rules, because Custom Rules are often not ed
   ]) assert.ok(msg.includes(phrase), `the first message is missing: ${phrase}`);
 });
 
-test('every image the README and the quickstart reference exists', () => {
+test('any image the README and the quickstart reference exists (they are text only for now)', () => {
   for (const file of ['README.md', 'QUICKSTART.md']) {
     const refs = [...rd(file).matchAll(/!\[[^\]]*\]\(([^)]+)\)/g)].map((m) => m[1]);
-    assert.ok(refs.length > 0, `${file} has no images`);
     for (const ref of refs) assert.ok(fs.existsSync(path.join(REPO, ref)), `${file} references ${ref}, which does not exist`);
   }
 });
 
-test('the README is five install steps before everything else, and the quickstart uses the same screenshots', () => {
+test('the README is five install steps before everything else', () => {
   const readme = rd('README.md');
   const install = readme.indexOf('## Install it in minutes');
   assert.ok(install > -1 && install < readme.indexOf('## How it works'));
   assert.deepEqual([...readme.matchAll(/^### (\d)\. /gm)].map((m) => m[1]), ['1', '2', '3', '4', '5']);
-  const imgs = (t) => new Set([...t.matchAll(/\(images\/([^)]+)\)/g)].map((m) => m[1]));
-  const quick = imgs(rd('QUICKSTART.md'));
-  for (const img of imgs(readme)) if (img !== '00-hero.png') assert.ok(quick.has(img), `quickstart is missing ${img}`);
-});
-
-test('the screenshot slots exist, and every .png really is a PNG (extra images and GIFs are fine)', () => {
-  const dir = path.join(REPO, 'images');
-  const files = fs.readdirSync(dir).filter((f) => !f.startsWith('.'));
-  for (const slot of ['00-hero.png', '01-create-dot.png', '02-paste-message.png', '03-connect-instantly.png', '04-setup-form.png', '05-setup-card.png', '06-first-cards.png']) {
-    assert.ok(files.includes(slot), `missing slot ${slot}`);
-  }
-  for (const f of files.filter((n) => n.endsWith('.png'))) assert.equal(fs.readFileSync(path.join(dir, f)).subarray(1, 4).toString(), 'PNG', `${f} has a .png name but is not a PNG (a JPEG renamed?)`);
 });
 
 test('the Instantly plugin link is the same in the README, the quickstart and the onboarding playbook', () => {
@@ -89,7 +76,6 @@ test('the message is pasted BEFORE Instantly is connected, because a Dot starts 
 
 test('Custom Rules are an optional extra: the locked state is explained and nothing depends on them', () => {
   for (const f of ['QUICKSTART.md', 'playbooks/00-onboarding.md', 'setup/dot-custom-rules.md']) assert.match(rd(f), /can't be edited right now/, f);
-  assert.ok(fs.existsSync(path.join(REPO, 'images/optional-custom-rules-locked.png')));
   assert.match(rd('QUICKSTART.md'), /## Optional: Custom Rules and plugin permissions/);
   assert.doesNotMatch(rd('README.md'), /### \d\. Add the Custom Rules/);
 });
