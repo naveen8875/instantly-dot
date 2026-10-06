@@ -30,6 +30,10 @@ test('the first message carries the rules, because Custom Rules are often not ed
   const msg = find(rd('README.md'), FIRST_RUN);
   for (const phrase of [
     'Do nothing on your own until setup is finished',
+    'no looking through replies or my inbox',
+    'During setup you may read my website, my Instantly workspace, its campaigns and its sending accounts',
+    'Talk to me in plain language',
+    'ask me for my website',
     'Connecting a plugin is not a task for you',
     'If I say stop, stop',
     'Never send an email, reply, follow-up or calendar invite',
@@ -87,4 +91,15 @@ test('setup ends with a "what I can do for you" menu, and the owner can ask for 
   assert.match(rd('playbooks/00-onboarding.md'), /templates\/menu\.md/);
   assert.match(rd('START_HERE.md'), /What can you do\?/);
   assert.match(rd('QUICKSTART.md'), /What can you do\?/);
+});
+
+test('the README and quickstart describe the website-first setup, with no questionnaire and no 10-bullet check', () => {
+  for (const f of ['README.md', 'QUICKSTART.md']) {
+    const text = rd(f);
+    assert.match(text, /your website/i, f);
+    assert.match(text, /looks good/i, f);
+    assert.doesNotMatch(text, /setup form/i, `${f} still mentions a setup form`);
+    assert.doesNotMatch(text, /10 bullets/i, `${f} still mentions the 10-bullet check`);
+  }
+  assert.match(rd('QUICKSTART.md'), /Explain your rules/);
 });

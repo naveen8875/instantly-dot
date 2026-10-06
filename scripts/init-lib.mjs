@@ -1,4 +1,5 @@
 import YAML from 'yaml';
+import { PROFILE_SECTIONS, UNFILLED } from './validate-lib.mjs';
 
 export const PLACEHOLDER = 'REPLACE_ME';
 // Default sign-off: the name set on the mailbox that sends the reply (Instantly's first_name and last_name on the account).
@@ -79,7 +80,7 @@ export function buildFiles(a, templates = {}) {
   const calendarLink = val(a.offer?.calendarLink);
 
   const workspace = {
-    client: { name: clientName },
+    client: { name: clientName, ...(a.client.website ? { website: String(a.client.website).trim() } : {}) },
     mode: 'dry_run',
     instantly: {
       connection: val(a.client.connection || `${a.client.name} Instantly`),
@@ -136,6 +137,17 @@ export function buildFiles(a, templates = {}) {
     ],
   };
 
+  const section = (title, body) => `## ${title}\n\n${body && String(body).trim() ? String(body).trim() : UNFILLED}\n`;
+  const known = {
+    'Who we help (and who we do not)': a.icp?.plainLanguage,
+    'What we offer and what we ask for': a.offer?.cta ? `We ask for: ${a.offer.cta}.` : '',
+    Booking: a.offer?.calendarLink ? a.offer.calendarLink : '',
+  };
+  const profile =
+    `# Business profile\n\nContext for writing in the owner's voice. The only results a message may claim are the ones in \`workspace.yaml\` under \`offer.proof_points\`. This file explains who we are and who we write to.\n\n` +
+    `- **Website:** ${a.client.website ? String(a.client.website).trim() : UNFILLED}\n- **In one line:** ${UNFILLED}\n- **Pages read:** ${UNFILLED}\n- **Last updated:** ${UNFILLED}\n\n` +
+    PROFILE_SECTIONS.map((s) => section(s, known[s])).join('\n');
+
   const stripComment = (t) => (t ?? '').replace(/<!--[\s\S]*?-->\s*\n?/g, '');
   const base = `clients/${folder}`;
   const files = {
@@ -146,6 +158,7 @@ export function buildFiles(a, templates = {}) {
       `# Client voice\n\nHard rules live in voice/tone.md. This file adds how this client sounds.\n\n- **Formality:** casual\n- **Greeting:** e.g. "Hey {first name},"\n- **Sign-off:** e.g. "Cheers, ${a.sender?.displayName && a.sender.displayName !== SENDING_ACCOUNT ? a.sender.displayName : "the sending account's name"}"\n- **Sentence length:** short and punchy\n- **Phrases they use:**\n- **Phrases they never use:**\n- **How they offer a call:** e.g. "Easiest is a quick 20 minutes, here are three times:"\n`,
     [`${base}/examples.md`]: stripComment(templates.examples) || '# Examples\n',
     [`${base}/learnings.md`]: templates.learnings ?? '# Learnings\n',
+    [`${base}/profile.md`]: profile,
     [`${base}/logs/README.md`]: templates.logsReadme ?? '# logs/\n',
   };
 

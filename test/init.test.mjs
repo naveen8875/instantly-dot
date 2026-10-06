@@ -151,3 +151,17 @@ test('the reply sign-off defaults to the sending account\'s name, and a fixed na
   const fixed = validateGenerated(full({ sender: { displayName: 'Sam Lee', signature: 'Sam Lee' } }));
   assert.match(fixed.files['clients/acme-co/workspace.yaml'], /signature: Sam Lee/);
 });
+
+test('the wizard writes a profile.md with the same sections as the template, and uses the website and audience it was given', () => {
+  const answers = full();
+  answers.client.website = 'https://acme.example.com';
+  const r = validateGenerated(answers);
+  assert.deepEqual(r.errors, []);
+  const profile = r.files['clients/acme-co/profile.md'];
+  const headings = [...profile.matchAll(/^## (.+)$/gm)].map((m) => m[1]);
+  const template = fs.readFileSync(path.join(REPO, 'clients/_template/profile.md'), 'utf8');
+  assert.deepEqual(headings, [...template.matchAll(/^## (.+)$/gm)].map((m) => m[1]));
+  assert.ok(profile.includes('https://acme.example.com'));
+  assert.ok(profile.includes('VPs of Sales at Series A fintech'));
+  assert.match(r.files['clients/acme-co/workspace.yaml'], /website: https:\/\/acme\.example\.com/);
+});

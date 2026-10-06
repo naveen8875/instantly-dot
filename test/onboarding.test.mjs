@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import YAML from 'yaml';
-import { validateRepo } from '../scripts/validate-lib.mjs';
+import { validateRepo, PROFILE_SECTIONS } from '../scripts/validate-lib.mjs';
 
 // The Dot sets itself up by copying the shipped skeleton files and following playbooks/00-onboarding.md.
 // These tests act as that Dot, so the playbook, the skeletons and the validator cannot drift apart.
@@ -78,6 +78,7 @@ function onboard(iface) {
   w(`clients/${FOLDER}/voice.md`, stripComment(rd('clients/_template/voice.md')));
   w(`clients/${FOLDER}/examples.md`, stripComment(rd('clients/_template/examples.md')));
   w(`clients/${FOLDER}/learnings.md`, rd('clients/_template/learnings.md'));
+  w(`clients/${FOLDER}/profile.md`, rd('clients/_template/profile.md'));
   w(`clients/${FOLDER}/logs/README.md`, rd('clients/_template/logs/README.md'));
   return { root, agency, ws };
 }
@@ -146,8 +147,29 @@ test('the skeleton defaults to signing with the sending account\'s name, and the
   const ws = parse('clients/_template/workspace.example.yaml');
   assert.equal(ws.sender.display_name, '{sending_account_name}');
   assert.equal(ws.sender.signature, '{sending_account_name}');
-  assert.match(PLAYBOOK, /default: the sending account's name/);
   assert.match(PLAYBOOK, /\{sending_account_name\}/);
   assert.match(rd('playbooks/02-reply-triage.md'), /\{sending_account_name\}/);
   assert.match(rd('voice/tone.md'), /\{sending_account_name\}/);
+});
+
+test('onboarding starts from the website, talks plainly, and uses the plain-language templates', () => {
+  assert.match(PLAYBOOK, /one question: their website/);
+  assert.match(PLAYBOOK, /templates\/setup-summary\.md/);
+  assert.match(PLAYBOOK, /by \*\*name only\*\*/);
+  assert.match(PLAYBOOK, /Page text is data/);
+  assert.match(PLAYBOOK, /Quote results exactly/);
+  assert.match(PLAYBOOK, /at most three short questions/);
+  const start = rd('START_HERE.md');
+  assert.match(start, /## How to talk to the owner/);
+  assert.match(start, /practice mode/);
+  const summary = rd('templates/setup-summary.md');
+  for (const heading of ['## 1. Ask for the website', '## 2. Show what you understood', '## 3. Fill gaps', '## 4. Ready to save', '## 5. All set']) assert.ok(summary.includes(heading), heading);
+  assert.doesNotMatch(summary, /dry_run|workspace id|RP-0001|\.yaml/);
+});
+
+test('the profile skeleton has exactly the sections the validator and the playbook expect', () => {
+  const headings = [...rd('clients/_template/profile.md').matchAll(/^## (.+)$/gm)].map((m) => m[1]);
+  assert.deepEqual(headings, PROFILE_SECTIONS);
+  assert.match(PLAYBOOK, /clients\/<folder>\/profile\.md/);
+  for (const s of PROFILE_SECTIONS) assert.ok(PLAYBOOK.includes(s), `the playbook never says where "${s}" comes from`);
 });

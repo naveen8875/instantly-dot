@@ -104,7 +104,9 @@ Created as a DRAFT. Nothing sends until you reply Launch.
 
 ---
 
-## Setup card
+## Setup card (technical: show only if the owner asks to see the files)
+
+During normal setup use the plain messages in `templates/setup-summary.md` instead.
 
 ```
 Ref {RP-0001} · SETUP · {client name}

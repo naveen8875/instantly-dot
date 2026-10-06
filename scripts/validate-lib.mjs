@@ -44,7 +44,17 @@ const EXAMPLE_SECTIONS = [
   'not now',
   'referral',
 ];
-const CLIENT_FILES = ['workspace.yaml', 'icp.yaml', 'voice.md', 'examples.md', 'learnings.md'];
+const CLIENT_FILES = ['workspace.yaml', 'icp.yaml', 'voice.md', 'examples.md', 'learnings.md', 'profile.md'];
+export const PROFILE_SECTIONS = [
+  'What we do',
+  'Who we help (and who we do not)',
+  'Who we reach out to first',
+  'What we offer and what we ask for',
+  'Proof we may cite',
+  'How we sound',
+  'Booking',
+];
+export const UNFILLED = '_Not filled in yet._';
 const HHMM = /^([01]\d|2[0-3]):[0-5]\d$/;
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -225,6 +235,7 @@ export function validateRepo(root, opts = {}) {
     const f = `${base}/workspace.yaml`;
 
     if (!nonEmpty(ws.client?.name)) err(f, 'client.name is required');
+    if (ws.client?.website !== undefined && !/^https?:\/\/[^\s]+\.[^\s]+$/.test(String(ws.client.website))) err(f, 'client.website must be a web address like https://example.com');
     if (!MODES.includes(ws.mode)) err(f, `mode must be one of ${MODES.join(', ')}`);
     const ins = ws.instantly ?? {};
     if (!nonEmpty(ins.connection)) err(f, 'instantly.connection is required');
@@ -303,6 +314,28 @@ export function validateRepo(root, opts = {}) {
         if (!posInt(s.batch_size) || (posInt(ws.limits?.max_leads_per_batch) && s.batch_size > ws.limits.max_leads_per_batch)) err(fi, `segment "${s.name}": batch_size must be a positive integer within limits.max_leads_per_batch`);
         if (!['A', 'B', 'C'].includes(s.structure)) err(fi, `segment "${s.name}": structure must be A, B or C`);
         if (!['signal', 'role-pain', 'company-context'].includes(s.personalization)) err(fi, `segment "${s.name}": personalization must be signal, role-pain or company-context`);
+      }
+    }
+
+    // profile.md: written from the owner's website. Unfilled sections are fine in practice mode and a blocker when live.
+    const prFile = path.join(dir, 'profile.md');
+    if (fs.existsSync(prFile)) {
+      const fp = `${base}/profile.md`;
+      const parts = read(prFile).split(/^## +/m).slice(1);
+      const found = {};
+      for (const part of parts) {
+        const nl = part.indexOf('\n');
+        found[(nl === -1 ? part : part.slice(0, nl)).trim()] = nl === -1 ? '' : part.slice(nl + 1).trim();
+      }
+      const unfilled = [];
+      for (const s of PROFILE_SECTIONS) {
+        if (!(s in found)) err(fp, `missing section "## ${s}"`);
+        else if (found[s] === '' || found[s] === UNFILLED) unfilled.push(s);
+      }
+      if (unfilled.length) {
+        const which = unfilled.length === PROFILE_SECTIONS.length ? 'all 7 sections are' : `${unfilled.length} section(s) are`;
+        if (ws.mode === 'live') err(fp, `${which} not filled in and this client is live: ${unfilled.join(', ')}`);
+        else warn(fp, `${which} not filled in (${unfilled.join(', ')}): ask the Dot to read your website and fill them`);
       }
     }
 

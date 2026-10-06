@@ -126,6 +126,7 @@ async function main() {
 
   const clientName = await ask('\nClient name (or your own company, if you are trying it on yourself):');
   const folder = slugify(clientName);
+  const website = await ask('Website (https://..., optional: the Dot reads it to learn what you do):');
 
   let found;
   if (!flag('no-api')) {
@@ -184,7 +185,7 @@ async function main() {
     interface: iface,
     agency: { name: agencyName, timezone, repo },
     owner: { name: ownerName, slackUser },
-    client: { name: clientName, folder, connection, workspaceId, campaigns, mailboxes },
+    client: { name: clientName, folder, website, connection, workspaceId, campaigns, mailboxes },
     sender: { displayName, signature: displayName },
     offer: { cta, calendarLink, videoLink, proofPoints: proof ? [proof] : [] },
     calendar: { id: 'primary', timezone },

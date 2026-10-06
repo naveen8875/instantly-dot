@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import YAML from 'yaml';
-import { validateRepo, CORE_NEVER, HARD_ASK } from '../scripts/validate-lib.mjs';
+import { validateRepo, CORE_NEVER, HARD_ASK, PROFILE_SECTIONS, UNFILLED } from '../scripts/validate-lib.mjs';
 import { buildRoutes, webhookCommands } from '../scripts/build-relay-routes.mjs';
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -15,6 +15,9 @@ const EXAMPLES = (fill = 'They asked a thing. We answered in one line.') =>
   ['interested', 'how it works', 'pricing', 'we already use a tool', 'no budget', 'send me info', 'not now', 'referral']
     .map((h) => `## ${h}\n\n${fill}\n`)
     .join('\n');
+
+const PROFILE = (fill = 'We help B2B teams book more meetings.') =>
+  `# Business profile\n\n- **Website:** https://example.com\n\n` + PROFILE_SECTIONS.map((s) => `## ${s}\n\n${fill}\n`).join('\n');
 
 function client(key, over = {}) {
   return {
@@ -100,6 +103,7 @@ function makeRepo({ clients = ['acme-co', 'globex'], tweak = () => {}, approvals
     w(`clients/${c}/voice.md`, '# Voice\n');
     w(`clients/${c}/examples.md`, EXAMPLES());
     w(`clients/${c}/learnings.md`, '# Learnings\n');
+    w(`clients/${c}/profile.md`, PROFILE());
   }
   fs.mkdirSync(path.join(root, 'playbooks'), { recursive: true });
   const ctx = { root, w, read: (rel) => fs.readFileSync(path.join(root, rel), 'utf8'), yaml: (rel, fn) => {
@@ -299,6 +303,34 @@ test('the sending-account sign-off placeholder is allowed, any other placeholder
   assert.deepEqual(validateRepo(ok.root).errors, []);
   const bad = makeRepo({ tweak: ({ yaml }) => yaml('clients/acme-co/workspace.yaml', (d) => (d.sender.signature = 'Best, {first_name}')) });
   assert.ok(has(validateRepo(bad.root), 'unknown placeholder {first_name}'));
+});
+
+test('profile.md is required, its sections must exist, and unfilled ones warn in practice mode and block when live', () => {
+  const missing = makeRepo({ tweak: ({ root }) => fs.rmSync(path.join(root, 'clients/acme-co/profile.md')) });
+  assert.ok(has(validateRepo(missing.root), 'clients/acme-co/profile.md: missing'));
+
+  const noSection = makeRepo({ tweak: ({ w }) => w('clients/acme-co/profile.md', PROFILE().replace('## Booking', '## Something else')) });
+  assert.ok(has(validateRepo(noSection.root), 'missing section "## Booking"'));
+
+  const dry = makeRepo({ tweak: ({ w }) => w('clients/acme-co/profile.md', PROFILE(UNFILLED)) });
+  const r = validateRepo(dry.root);
+  assert.deepEqual(r.errors, []);
+  assert.ok(r.warnings.some((x) => x.includes('all 7 sections are not filled in') && x.includes('read your website')));
+
+  const live = makeRepo({
+    tweak: ({ w, yaml }) => {
+      w('clients/acme-co/profile.md', PROFILE().replace(/## Booking\n\n[^\n]+/, `## Booking\n\n${UNFILLED}`));
+      yaml('clients/acme-co/workspace.yaml', (d) => (d.mode = 'live'));
+    },
+  });
+  assert.ok(has(validateRepo(live.root), 'not filled in and this client is live: Booking'));
+});
+
+test('client.website, when given, must be a web address', () => {
+  const ok = makeRepo({ tweak: ({ yaml }) => yaml('clients/acme-co/workspace.yaml', (d) => (d.client.website = 'https://acme.example.com')) });
+  assert.deepEqual(validateRepo(ok.root).errors, []);
+  const bad = makeRepo({ tweak: ({ yaml }) => yaml('clients/acme-co/workspace.yaml', (d) => (d.client.website = 'not a url')) });
+  assert.ok(has(validateRepo(bad.root), 'client.website must be a web address'));
 });
 
 test('bounce_warn must be lower than bounce_stop', () => {
