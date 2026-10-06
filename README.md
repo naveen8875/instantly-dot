@@ -114,7 +114,7 @@ Use a test workspace for a first try.
 | Path | What it is |
 |---|---|
 | `QUICKSTART.md` | The full step-by-step guide, with troubleshooting |
-| `CAPABILITIES.md` | What it can do, what is proven, what we could add next. For review |
+| `CAPABILITIES.md` | What the Dot can do, what we could add next, and our research |
 | `START_HERE.md` | The Dot's operating manual, re-read every run |
 | `triggers.md` | What wakes the Dot: your request, schedules, and the optional Slack relay |
 | `config/` | `approvals.yaml` (auto, ask or never per action), `agency.example.yaml` |

@@ -105,15 +105,17 @@ test('the README and quickstart describe the website-first setup, with no questi
   assert.match(rd('QUICKSTART.md'), /Explain your rules/);
 });
 
-test('CAPABILITIES.md quotes real numbers: the approval counts and the playbook count match the repo', () => {
-  const approvals = rd('config/approvals.yaml');
-  const body = approvals.slice(approvals.indexOf('actions:'));
-  const count = (level) => [...body.matchAll(new RegExp(`^  [a-z_]+: ${level}\\b`, 'gm'))].length;
+test('CAPABILITIES.md covers what it can do, what we can add, and the research, and stays simple', () => {
   const doc = rd('CAPABILITIES.md');
-  assert.match(doc, new RegExp(`Without asking \\(${count('auto')}\\)`));
-  assert.match(doc, new RegExp(`Asks first \\(${count('ask')}\\)`));
-  assert.match(doc, new RegExp(`Never\\. A human does it \\(${count('never')}\\)`));
-  assert.match(doc, new RegExp(`\\(${count('auto') + count('ask') + count('never')} actions\\)`));
-  const playbooks = fs.readdirSync(path.join(REPO, 'playbooks')).filter((f) => f.endsWith('.md')).length;
-  assert.match(doc, new RegExp(`\\b${playbooks} jobs\\)`));
+  for (const h of ['## Try it in 15 minutes', '## What it can do', '## What we can add next', '## Our research']) assert.ok(doc.includes(h), `missing ${h}`);
+  assert.doesNotMatch(doc, /MR-AUT|instantly-skills|capability-map|\/Users\//);
+  assert.match(doc, /read-only/i);
+  // every command it tells people to say exists in the Dot's manual
+  const start = rd('START_HERE.md');
+  for (const cmd of ['Stop', 'What can you do?', 'Explain your rules', 'Show me the files', 'Back up my data', 'Update yourself']) {
+    assert.ok(start.includes(cmd), `START_HERE.md does not define "${cmd}"`);
+  }
+  // scannable: no long walls of prose (any single paragraph line over 400 characters is a smell)
+  const long = doc.split('\n').filter((l) => !l.startsWith('|') && !l.startsWith('```') && l.length > 400);
+  assert.deepEqual(long, []);
 });
