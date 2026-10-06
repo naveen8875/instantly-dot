@@ -24,6 +24,7 @@ test('the first-run message is identical in the README, the quickstart and the b
   const readme = find(rd('README.md'), FIRST_RUN);
   assert.equal(find(rd('QUICKSTART.md'), FIRST_RUN), readme);
   assert.equal(find(rd('setup/bootstrap-prompt.md'), FIRST_RUN), readme);
+  assert.equal(find(rd('CAPABILITIES.md'), FIRST_RUN), readme);
 });
 
 test('the first message carries the rules, because Custom Rules are often not editable', () => {
@@ -102,4 +103,17 @@ test('the README and quickstart describe the website-first setup, with no questi
     assert.doesNotMatch(text, /10 bullets/i, `${f} still mentions the 10-bullet check`);
   }
   assert.match(rd('QUICKSTART.md'), /Explain your rules/);
+});
+
+test('CAPABILITIES.md quotes real numbers: the approval counts and the playbook count match the repo', () => {
+  const approvals = rd('config/approvals.yaml');
+  const body = approvals.slice(approvals.indexOf('actions:'));
+  const count = (level) => [...body.matchAll(new RegExp(`^  [a-z_]+: ${level}\\b`, 'gm'))].length;
+  const doc = rd('CAPABILITIES.md');
+  assert.match(doc, new RegExp(`Without asking \\(${count('auto')}\\)`));
+  assert.match(doc, new RegExp(`Asks first \\(${count('ask')}\\)`));
+  assert.match(doc, new RegExp(`Never\\. A human does it \\(${count('never')}\\)`));
+  assert.match(doc, new RegExp(`\\(${count('auto') + count('ask') + count('never')} actions\\)`));
+  const playbooks = fs.readdirSync(path.join(REPO, 'playbooks')).filter((f) => f.endsWith('.md')).length;
+  assert.match(doc, new RegExp(`\\b${playbooks} jobs\\)`));
 });
