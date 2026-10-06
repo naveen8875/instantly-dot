@@ -136,4 +136,3 @@ npm run validate    # check your config; add --data <folder> if it lives elsewhe
 ## Built from
 
 The reply, deliverability, sequence, lead-sourcing and analytics rules are adapted from Instantly's GTM skills.
-The structure (a folder of text files, approvals, dry run, learnings, Phase 0 checks) follows HeyReach's ReachPilot for LinkedIn.
