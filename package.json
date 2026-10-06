@@ -1,0 +1,17 @@
+{
+  "name": "instantly-dot",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A ChatGPT Dot that runs email outreach on Instantly for every client an agency manages.",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "init": "node scripts/init.mjs",
+    "validate": "node scripts/validate.mjs",
+    "test": "node --test",
+    "relay:routes": "node scripts/build-relay-routes.mjs"
+  },
+  "dependencies": {
+    "yaml": "^2.5.0"
+  }
+}

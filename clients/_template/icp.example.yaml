@@ -1,0 +1,23 @@
+# REPLACE_ME: copy to icp.yaml, fill it, delete the example file and this line.
+# Each segment is one audience the Dot may propose lead batches for.
+# search_filters use Instantly SuperSearch's closed enums: see playbooks/04-lead-sourcing.md.
+
+segments:
+  - name: "REPLACE_ME"              # e.g. "Series A fintech, VP Sales"
+    active: true
+    plain_language: "REPLACE_ME"    # one sentence the human would recognise
+    campaign_id: "REPLACE_ME"       # the campaign that takes this segment's leads
+    search_filters:                 # optional at first: leave as {} and the Dot builds filters from plain_language and shows them on the batch card
+      title: { include: ["REPLACE_ME"] }
+      level: ["VP-Level"]
+      department: ["Sales"]
+      industry: { include: ["Financial Services"] }
+      funding_type: ["series_a"]
+      # employeeCount, revenue, locations, news, signals: see the playbook
+    never_contact:                  # domains and addresses that must never be proposed
+      domains: []
+      emails: []
+    batch_size: 100                 # leads per proposed batch
+    refill_when_days_of_leads_below: 5
+    structure: "A"                  # sequence shape from playbooks/05-sequence-writing.md: A, B or C
+    personalization: "role-pain"    # signal | role-pain | company-context

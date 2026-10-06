@@ -1,0 +1,44 @@
+# REPLACE_ME: you normally do not edit this by hand. Run `npm run init` and it writes config/agency.yaml for you.
+# By hand: copy this file to agency.yaml, fill every value, then delete this comment line.
+# The validator fails on the word REPLACE_ME anywhere in agency.yaml, including this comment.
+
+interface: "chatgpt"                # chatgpt | slack
+                                    #   chatgpt: you approve in the Dot's ChatGPT chat. No Slack, no relay. Easiest. Wake: schedules or "check my inbox".
+                                    #   slack:   you approve in Slack channels, and a relay can wake the Dot within minutes.
+
+agency:
+  name: "REPLACE_ME"
+  timezone: "REPLACE_ME"            # IANA name, e.g. "America/New_York"
+  repo: "REPLACE_ME"                # owner/name of your private copy of this repo
+  owner:
+    name: "REPLACE_ME"
+    slack_user: "REPLACE_ME"        # slack only: e.g. "@sam". Delete this line for chatgpt. Only the owner can direct a Dot in Slack.
+  approvers:                        # people whose Send / Edit / Skip you accept
+    - name: "REPLACE_ME"
+      slack_user: "REPLACE_ME"      # slack only. Delete this line for chatgpt.
+  channels:                         # slack only. Delete this whole block for chatgpt. Totals only: no names, no messages
+    digest: "#agency-digest"
+    alerts: "#agency-alerts"
+
+canary: "v1"                        # bump after every push; the next run's log header must show it
+
+mode: dry_run                       # dry_run | live | paused (paused stops every client)
+
+quiet_hours:
+  from: "22:00"
+  to: "07:00"                       # nothing is posted or sent in this window
+
+wake:
+  primary: "schedule_only"          # schedule_only | slack_event (slack_event needs interface slack and a passing Phase 0 test 3)
+  backup_poll_minutes: 60
+
+slack:
+  non_owner_slack_approvals: false  # slack only. Set true only after Phase 0 test 7 passes
+
+fallbacks:
+  allow_browser_fallback: true      # Dot uses the Instantly web app in its own browser; you sign in yourself
+  allow_zapier_fallback: false
+
+clients:
+  - folder: "REPLACE_ME"            # folder name under clients/
+    active: true

@@ -1,0 +1,70 @@
+# Every action the Dot can take is set to auto, ask or never.
+# Anything not listed here counts as ask.
+#
+#   auto   do it and report it
+#   ask    post a card in the client's approvals channel and wait for an explicit yes
+#   never  hand it to a human; the Dot does not attempt it
+#
+# scripts/validate.mjs enforces these pins on every push:
+#   - every action marked never below must stay never (CORE_NEVER)
+#   - the actions that spend credits or change what sends must not be auto (HARD_ASK)
+#   - any send_* / book_meeting set to auto lets the build pass with a WARNING
+#
+# Playbooks cite actions as (approval: <name>). The validator fails if a playbook
+# cites a name that is not in this file, so playbooks and this file cannot drift.
+version: 1
+
+actions:
+  # --- Reading and bookkeeping: no effect on any person, campaign or mailbox
+  read_inbox: auto
+  read_thread: auto
+  read_campaigns_and_analytics: auto
+  read_mailbox_health: auto
+  read_calendar: auto
+  preview_leads: auto               # SuperSearch count + free preview. No credits.
+  post_slack_card: auto
+  write_repo_logs: auto             # clients/<c>/logs/** only
+  write_learnings: auto             # clients/<c>/learnings.md only
+
+  # --- Light touch changes inside Instantly
+  set_interest_status: auto         # queued (202), report as queued not done
+  label_lead: auto                  # custom lead label; Instantly tags cannot be put on leads
+  mark_thread_read: auto
+  stop_lead_unsubscribe: auto       # block-list the address + status -1; never replies
+
+  # --- Anything that emails a person
+  send_reply_interested: ask
+  send_reply_question: ask
+  send_reply_objection: ask
+  send_reply_not_now: ask
+  send_reply_referral: ask
+  send_slot_offer: ask
+  send_booking_confirmation: ask
+  send_follow_up: ask
+  book_meeting: ask                 # creates the calendar event
+
+  # --- Spend and structure
+  enrich_and_verify_leads: ask      # spends credits
+  create_campaign_draft: ask        # created inactive, nothing sends
+  add_leads_to_campaign: ask        # on a live campaign these people get emailed
+  activate_campaign: ask            # only after the launch preflight passes
+  write_setup_config: ask           # onboarding: creates config/agency.yaml and a new clients/<c>/ folder, after a setup card. In dry_run only
+  pause_campaign: ask
+  resume_campaign: ask
+  update_campaign_settings: ask     # schedule, daily limit, sender list
+  pause_or_resume_mailbox: ask
+
+  # --- Never: a human does these in Instantly or GitHub
+  edit_live_campaign_sequence: never   # the Dot drafts variants, a human pastes them
+  delete_anything: never               # campaigns, leads, lists, mailboxes, emails
+  connect_or_remove_mailbox: never
+  change_warmup_settings: never
+  change_passwords_billing_or_keys: never
+  buy_domains_or_mailboxes: never
+  share_data_across_clients: never
+  send_via_other_mail_plugin: never    # Instantly is the only send path
+  forward_email: never
+  update_lead_or_account_fields: never
+  reply_to_sensitive: never            # legal, complaint, data deletion, angry
+  reply_to_no_reply_categories: never  # not_interested, unsubscribe, ooo, wrong_person with no named contact
+  edit_repo_config: never              # edits to config/approvals.yaml, playbooks/, voice/, scripts/, START_HERE.md. The instructions are read only

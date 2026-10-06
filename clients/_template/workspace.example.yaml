@@ -1,0 +1,57 @@
+# REPLACE_ME: copy to workspace.yaml, fill every value, delete the example file and this line.
+
+client:
+  name: "REPLACE_ME"
+
+mode: dry_run                       # dry_run | live | paused. The stricter of agency and client mode wins.
+
+instantly:
+  connection: "REPLACE_ME"          # name of the Dot's Instantly connection for THIS workspace
+  workspace_id: "REPLACE_ME"        # from whoami. The Dot re-checks it before every write.
+  dot_sets_interest_status: true    # false if the client has automations on interest-status events
+  campaigns:                        # every campaign the Dot may read, reply on or add leads to
+    - id: "REPLACE_ME"
+      name: "REPLACE_ME"
+  mailboxes:                        # sender addresses that belong to this client and no one else
+    - "REPLACE_ME"
+
+slack:                              # slack only: delete this whole block for interface chatgpt. Four channels per client, never shared
+  events: "#REPLACE_ME-events"      # reserved for relay posts; keep people out
+  approvals: "#REPLACE_ME-approvals"
+  alerts: "#REPLACE_ME-alerts"
+  reports: "#REPLACE_ME-reports"
+
+sender:
+  display_name: "REPLACE_ME"        # who replies are signed as
+  signature: "REPLACE_ME"           # exact text appended to every reply
+
+offer:
+  primary_cta: "REPLACE_ME"         # e.g. "a 20-minute call"
+  calendar_link: "REPLACE_ME"       # fallback when live slots are unavailable
+  proof_points:                     # the ONLY results or claims a message may use
+    - "REPLACE_ME"
+
+calendar:
+  calendar_id: "REPLACE_ME"         # shared with the Google account the Dot uses
+  timezone: "REPLACE_ME"
+  working_hours: { from: "09:00", to: "17:00", days: [1, 2, 3, 4, 5] }
+  meeting_minutes: 20
+  buffer_minutes: 15
+  slots_to_offer: 3
+  booking_window_days: 7
+  video_link: "REPLACE_ME"
+
+limits:
+  max_replies_sent_per_run: 10
+  max_leads_per_batch: 200
+  max_new_leads_added_per_day: 100  # across all campaigns; keeps volume inside what the mailboxes can carry
+
+health:                             # policy defaults, tune per client after a month of data
+  min_health_score: 80
+  bounce_warn: 0.03
+  bounce_stop: 0.05
+  spam_complaint_stop: 0.003
+  daily_headroom_fraction: 0.5      # near a limit, use only this share of what is left
+
+reporting:
+  positive_reply_target: 0.01       # positive replies / emails sent

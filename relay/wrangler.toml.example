@@ -1,0 +1,12 @@
+name = "instantly-dot-relay"
+main = "relay.mjs"
+compatibility_date = "2026-09-01"
+
+# Optional but recommended: de-duplicates Instantly's retries.
+# Create with: npx wrangler kv namespace create DEDUPE
+[[kv_namespaces]]
+binding = "DEDUPE"
+id = "REPLACE_WITH_KV_ID"
+
+# Secrets (set with `wrangler secret put`, never in this file):
+#   RELAY_SECRET, ROUTES, SLACK_WEBHOOK_AGENCY, SLACK_WEBHOOK_<CLIENT>

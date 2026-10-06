@@ -1,0 +1,20 @@
+name: validate
+on: [push, pull_request]
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm install
+      - run: npm test
+      # The published template has no config/agency.yaml yet, so there is nothing to validate there.
+      # In your own copy (after `npm run init`) this runs on every push and blocks unsafe config.
+      - name: Validate this copy's config
+        run: |
+          if [ -f config/agency.yaml ]; then
+            npm run validate
+          else
+            echo "No config/agency.yaml: this is the template. Skipping config validation."
+          fi

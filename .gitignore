@@ -1,0 +1,7 @@
+node_modules/
+.DS_Store
+.dev.vars
+relay/.env
+
+# Internal notes: research, capability report and the maintainer guide. Not part of the public repo.
+docs/internal/
