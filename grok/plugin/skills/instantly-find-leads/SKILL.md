@@ -74,7 +74,11 @@ The owner can attach the list to a campaign later, after the client goes live.
    | Title relevance (no assistants, students, interns) | few generic titles |
    | Completeness (first name, company) | under 10% missing |
 
-   A or B: go. C: name the cheap fixes and apply them. D or F: stop and say why. The verify gate is the only hard block regardless of grade.
+   Score each dimension 0 to 100 and show the weighted letter grade, the 0 to 100 for each dimension, and the **top three issues**, biggest effect on sending reputation first.
+   **A or B: go.** **C: fix first.** Name the cheap fixes (drop role-based addresses, re-verify pending rows, tighten or widen the filters) and offer to apply them.
+   **D or F, or any unverified row: no-go.** Stop, say why, and go back to step 2 or to verification.
+   The grade only suggests: it never deletes a lead, and the owner decides on anything soft. The verify gate is the only hard block regardless of grade: unverified rows are never emailed.
+   If there is no `profile.md` or `icp.yaml` to compare against, skip the fit dimension and say it was not checked. Under about 50 leads, say the grade has low confidence.
 6. **Attach** (approval: add_leads_to_campaign) the verified rows to the campaign named on the card, and only that campaign.
    In batches of 1,000 or fewer, skip leads already in the campaign, do not re-verify on import.
    Personalised openers go in as a custom variable at add time (for example `rp_opener`). Never patch fields on existing leads (approval: update_lead_or_account_fields).

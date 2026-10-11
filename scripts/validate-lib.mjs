@@ -28,10 +28,14 @@ export const HARD_ASK = [
   'pause_or_resume_mailbox',
   'update_campaign_settings',
   'write_setup_config',
+  'take_client_live',
+  'add_referred_lead',
+  'run_inbox_placement_test',
 ];
 
 const LEVELS = ['auto', 'ask', 'never'];
 const MODES = ['dry_run', 'live', 'paused'];
+const ACCESS_LEVELS = ['read', 'working', 'scale'];
 const WAKE = ['schedule_only', 'slack_event'];
 const INTERFACES = ['chat', 'chatgpt', 'slack']; // chat = approve in the conversation with the agent (chatgpt is the older name for the same thing)
 const EXAMPLE_SECTIONS = [
@@ -241,6 +245,7 @@ export function validateRepo(root, opts = {}) {
     if (!nonEmpty(ins.connection)) err(f, 'instantly.connection is required');
     if (!nonEmpty(ins.workspace_id)) err(f, 'instantly.workspace_id is required');
     if (typeof ins.dot_sets_interest_status !== 'boolean') err(f, 'instantly.dot_sets_interest_status must be true or false');
+    if (ins.access_level !== undefined && !ACCESS_LEVELS.includes(ins.access_level)) err(f, `instantly.access_level must be one of ${ACCESS_LEVELS.join(', ')} (optional: what the key and connection allow)`);
     const campaigns = Array.isArray(ins.campaigns) ? ins.campaigns : [];
     if (campaigns.length === 0) err(f, 'instantly.campaigns needs at least one campaign');
     for (const c of campaigns) if (!nonEmpty(c?.id) || !nonEmpty(c?.name)) err(f, 'every campaign needs id and name');

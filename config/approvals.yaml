@@ -47,10 +47,13 @@ actions:
   enrich_and_verify_leads: ask      # spends credits
   create_campaign_draft: ask        # created inactive, nothing sends
   add_leads_to_campaign: ask        # on a live campaign these people get emailed
+  add_referred_lead: ask            # a reply names someone to talk to: add that one person, only with an email address from the thread
   activate_campaign: ask            # only after the launch preflight passes
   write_setup_config: ask           # onboarding: creates config/agency.yaml and a new clients/<c>/ folder, after a setup card. In dry_run only
   pause_campaign: ask
+  take_client_live: ask             # takes a client out of practice mode. The Dot: the owner edits mode in the settings files. The Bot: only /instantly-go-live, after the owner types the exact words
   resume_campaign: ask
+  run_inbox_placement_test: ask     # sends test emails from the client's real mailboxes
   update_campaign_settings: ask     # schedule, daily limit, sender list
   pause_or_resume_mailbox: ask
 

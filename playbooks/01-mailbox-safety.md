@@ -38,6 +38,23 @@ Only the mailboxes listed in `workspace.yaml` count. Ignore every other mailbox 
 6. **Post only changes.** Compare with the last `mailbox_state` line in `logs/runs.md`. Post a card in the alerts channel
    (`templates/slack-cards.md`, Mailbox alert) only when a mailbox or campaign changed state. Always log the full state.
 
+## Deliverability watch (on demand, and in the digest)
+
+Wake: the owner asks "how is my deliverability?", or the digest runs. Read-only: it reports and suggests, it never changes anything (approval: read_mailbox_health).
+1. Read each client mailbox's warmup health, the campaigns' sending status and the last 7 days of bounces and spam placement, and run the DNS check on any domain that looks off.
+2. Tag what you find **good**, **watch** or **act**, with the numbers and one suggestion each. Use `templates/deliverability-card.md`.
+   - A bounce or spam uptick is a **watch** item: suggest resting the domain, lowering the daily volume, re-verifying the list or checking DNS. **Never pause anything on your own.**
+   - Bounce above the stop level, a failed DNS record, or a mailbox gone unhealthy is an **act** item: a person fixes it in Instantly. Say what and where.
+3. **Say honestly what the cause is.** If sender health is fine and replies are low, the cause is the copy or the audience: point at `05-sequence-writing.md`, and do not push more senders. If the senders are cold, unwarmed or unhealthy, say so, and mention capacity once. If there is not enough data, say "not enough data yet".
+
+## Inbox placement test
+
+Shows whether emails from the client's mailboxes land in the inbox or in spam.
+- **Reading** results is free and needs no card. It covers the tests, their inbox and spam counts over time, the blacklist and spam-filter reports, and the insights (approval: read_mailbox_health).
+- **Creating** a test sends test emails from the client's real mailboxes (approval: run_inbox_placement_test). Name the mailboxes and how many test emails go out, and wait for a yes. One test at a time. Never change or delete a test: a person does that in Instantly.
+- Show the result in plain words: inbox vs spam, which provider put it in spam, one suggestion. Use `templates/deliverability-card.md`.
+- Never run a placement test on a schedule or without the owner asking: it sends email.
+
 ## What changes in other playbooks
 
 - A reply must be sent from the mailbox that received it. If that mailbox is RED, the card says `BLOCKED: mailbox <x> needs reconnecting in Instantly`

@@ -409,3 +409,21 @@ test('relay routes come from the client folders and warn about shared workspaces
   assert.ok(warnings[0].includes('shared by'));
   assert.ok(secrets.includes('SLACK_WEBHOOK_GLOBEX') && secrets.includes('RELAY_SECRET'));
 });
+
+test('instantly.access_level is optional and must be read, working or scale', () => {
+  const none = makeRepo({});
+  assert.deepEqual(validateRepo(none.root).errors, []);
+  for (const level of ['read', 'working', 'scale']) {
+    const ok = makeRepo({ tweak: ({ yaml }) => yaml('clients/acme-co/workspace.yaml', (d) => (d.instantly.access_level = level)) });
+    assert.deepEqual(validateRepo(ok.root).errors, [], level);
+  }
+  const bad = makeRepo({ tweak: ({ yaml }) => yaml('clients/acme-co/workspace.yaml', (d) => (d.instantly.access_level = 'admin')) });
+  assert.ok(has(validateRepo(bad.root), 'instantly.access_level must be one of read, working, scale'));
+});
+
+test('take_client_live is a pinned ask action: setting it to auto fails, removing it is allowed for the Dot', () => {
+  const loosened = APPROVALS.replace(/^(\s*take_client_live:)\s*\w+/m, '$1 auto');
+  assert.notEqual(loosened, APPROVALS);
+  const { root } = makeRepo({ approvals: loosened });
+  assert.ok(has(validateRepo(root), 'take_client_live must not be "auto"'));
+});

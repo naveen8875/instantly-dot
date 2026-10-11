@@ -1,0 +1,126 @@
+# What the Instantly Bot may call, and nothing else. Every tool not listed here is blocked.
+#
+# This is the single source for:
+#   - the "Instantly tools you may use" section of the operating-rules skill
+#   - the scope checklist the Bot shows when the owner makes a key
+#   - the `enabledTools` allowlist in grok/plugin/mcp*.json
+# Change it, then run `npm run build:grok`. The build fails if a tool is not in grok/tools.snapshot.txt,
+# if a tool that a `never` rule in config/approvals.yaml forbids is allowed, or if a dangerous tool slips in.
+#
+# Fields of a tool:  tool     the exact MCP tool name
+#                    scope    the Instantly API-key scope it needs (best known; `verify: true` means "confirm in the live test")
+#                    for      what the Bot uses it for, in plain words
+#                    ask      true  = the owner says yes first, every time (the matching action in config/approvals.yaml is `ask`)
+#                             false = the Bot may do it and report it (the action is `auto`, or it only reads)
+#                    actions  the actions in config/approvals.yaml it belongs to (checked against that file)
+version: 1
+snapshot: grok/tools.snapshot.txt
+features:
+  # Instantly's accounts:update scope also allows warmup changes and account edits, and its scopes cannot separate them.
+  # Leave this off until the app-side tool allowlist is proven to work (chunk 01, S2); then the allowlist is what keeps warmup out of reach.
+  mailbox_pause: false
+
+server:
+  name: instantly
+  url: https://mcp.instantly.ai/mcp
+  key_variable: INSTANTLY_API_KEY
+
+read:
+  title: Read-only
+  summary: "Looks at replies, campaigns, mailboxes and leads, and drafts answers for you to copy. Changes nothing in Instantly."
+  key_scopes: ["all:read"]
+  tools:
+    - { tool: workspace_get, scope: "workspaces:read", verify: true, ask: false, for: "check which workspace it is connected to" }
+    - { tool: get_server_info, scope: none, verify: true, ask: false, for: "see the connection's version" }
+    - { tool: list_accounts, scope: "accounts:read", ask: false, for: "list sending mailboxes and their status", actions: [read_mailbox_health] }
+    - { tool: get_account, scope: "accounts:read", ask: false, for: "one mailbox in detail", actions: [read_mailbox_health] }
+    - { tool: get_warmup_analytics, scope: "accounts:read", ask: false, for: "warmup and inbox health", actions: [read_mailbox_health] }
+    - { tool: analytics_daily_account, scope: "accounts:read", ask: false, for: "emails sent per day by mailbox", actions: [read_mailbox_health] }
+    - { tool: accounts_test_vitals, scope: "accounts:read", verify: true, ask: false, for: "check a sending domain's DNS records", actions: [read_mailbox_health] }
+    - { tool: list_campaigns, scope: "campaigns:read", ask: false, for: "list campaigns", actions: [read_campaigns_and_analytics] }
+    - { tool: get_campaign, scope: "campaigns:read", ask: false, for: "one campaign in detail", actions: [read_campaigns_and_analytics] }
+    - { tool: campaigns_sending_status, scope: "campaigns:read", ask: false, for: "why a campaign is or is not sending", actions: [read_campaigns_and_analytics] }
+    - { tool: analytics_campaign_overview, scope: "campaigns:read", ask: false, for: "totals across campaigns", actions: [read_campaigns_and_analytics] }
+    - { tool: analytics_campaign_steps, scope: "campaigns:read", ask: false, for: "results by step and variant", actions: [read_campaigns_and_analytics] }
+    - { tool: get_campaign_analytics, scope: "campaigns:read", ask: false, for: "results for one or more campaigns", actions: [read_campaigns_and_analytics] }
+    - { tool: get_daily_campaign_analytics, scope: "campaigns:read", ask: false, for: "results by day", actions: [read_campaigns_and_analytics] }
+    - { tool: count_unread_emails, scope: "emails:read", ask: false, for: "how many replies are waiting", actions: [read_inbox] }
+    - { tool: list_emails, scope: "emails:read", ask: false, for: "list replies in the inbox", actions: [read_inbox] }
+    - { tool: get_email, scope: "emails:read", ask: false, for: "read one reply and its thread", actions: [read_thread] }
+    - { tool: get_background_job, scope: "background_jobs:read", verify: true, ask: false, for: "check whether a queued change finished" }
+    - { tool: blocklist_list, scope: "block_list_entries:read", ask: false, for: "see who is blocked, to skip them" }
+    - { tool: lead_labels_list, scope: "lead-labels:read", ask: false, for: "see existing lead labels" }
+    - { tool: enrichment_count, scope: "supersearch_enrichments:read", ask: false, for: "count leads that match a search (free)", actions: [preview_leads] }
+    - { tool: enrichment_preview, scope: "supersearch_enrichments:read", ask: false, for: "preview leads that match a search (free)", actions: [preview_leads] }
+    - { tool: list_lead_lists, scope: "lead_lists:read", ask: false, for: "list lead lists" }
+    - { tool: lead_lists_get, scope: "lead_lists:read", ask: false, for: "one lead list" }
+    - { tool: get_verification_stats_for_lead_list, scope: "lead_lists:read", verify: true, ask: false, for: "how many addresses in a list are valid" }
+    - { tool: list_leads, scope: "leads:read", ask: false, for: "list leads in a campaign or list" }
+    - { tool: get_lead, scope: "leads:read", ask: false, for: "one lead in detail" }
+    - { tool: inbox_placement_list, scope: "inbox_placement:read", verify: true, ask: false, for: "list inbox placement tests", actions: [read_mailbox_health] }
+    - { tool: inbox_placement_get, scope: "inbox_placement:read", verify: true, ask: false, for: "one placement test in detail", actions: [read_mailbox_health] }
+    - { tool: inbox_placement_analytics_get, scope: "inbox_placement:read", verify: true, ask: false, for: "one placement result", actions: [read_mailbox_health] }
+    - { tool: inbox_placement_analytics_list, scope: "inbox_placement:read", verify: true, ask: false, for: "the results of a placement test", actions: [read_mailbox_health] }
+    - { tool: inbox_placement_analytics_insights, scope: "inbox_placement:read", verify: true, ask: false, for: "deliverability insights from a placement test", actions: [read_mailbox_health] }
+    - { tool: inbox_placement_analytics_stats_by_date, scope: "inbox_placement:read", verify: true, ask: false, for: "inbox and spam counts over time", actions: [read_mailbox_health] }
+    - { tool: inbox_placement_analytics_stats_by_test, scope: "inbox_placement:read", verify: true, ask: false, for: "inbox and spam totals for each test", actions: [read_mailbox_health] }
+    - { tool: inbox_placement_reports_get, scope: "inbox_placement:read", verify: true, ask: false, for: "one blacklist and spam-filter report", actions: [read_mailbox_health] }
+    - { tool: inbox_placement_reports_list, scope: "inbox_placement:read", verify: true, ask: false, for: "list blacklist and spam-filter reports", actions: [read_mailbox_health] }
+    - { tool: inbox_placement_esp_options, scope: "inbox_placement:read", verify: true, ask: false, for: "which email providers a placement test can use", actions: [read_mailbox_health] }
+    - { tool: dfy_orders_pre_warmed, scope: "dfy_email_account_orders:read", verify: true, ask: false, for: "see which pre-warmed domains are in stock" }
+    - { tool: dfy_orders_similar_domains, scope: "dfy_email_account_orders:read", verify: true, ask: false, for: "suggest available domains that look like the owner's brand" }
+    - { tool: dfy_orders_check_domains, scope: "dfy_email_account_orders:read", verify: true, ask: false, for: "check whether chosen domains are available" }
+    - { tool: dfy_orders_list, scope: "dfy_email_account_orders:read", verify: true, ask: false, for: "list the owner's earlier mailbox and domain orders" }
+    - { tool: dfy_orders_list_accounts, scope: "dfy_email_account_orders:read", verify: true, ask: false, for: "list the mailboxes those orders created" }
+
+working:
+  title: Working access
+  summary: "Everything in read-only, plus the ability to act: reply, add leads, build and launch campaigns. It still asks you before each one."
+  # Scopes to try adding if Instantly refuses one of these steps in the live test (see setup/scoped-keys.md).
+  if_refused_add: ["email_verifications:read", "email_verifications:create"]
+  tools:
+    - { tool: reply_to_email, scope: "emails:create", ask: true, for: "send a reply you approved", actions: [send_reply_interested, send_reply_question, send_reply_objection, send_reply_not_now, send_reply_referral, send_slot_offer, send_booking_confirmation, send_follow_up] }
+    - { tool: mark_thread_as_read, scope: "emails:update", ask: false, for: "mark a handled thread as read", actions: [mark_thread_read] }
+    - { tool: leads_update_interest_status, scope: "leads:update", verify: true, ask: false, for: "mark a lead interested, not interested and so on (queued by Instantly)", actions: [set_interest_status, label_lead] }
+    - { tool: blocklist_create, scope: "block_list_entries:create", ask: false, for: "stop emailing someone who asked to unsubscribe", actions: [stop_lead_unsubscribe] }
+    - { tool: lead_labels_create, scope: "lead-labels:create", ask: false, for: "create a label such as one for sensitive replies", actions: [label_lead] }
+    - { tool: create_lead_list, scope: "lead_lists:create", ask: true, for: "create the list for a lead batch", actions: [enrich_and_verify_leads] }
+    - { tool: enrichment_enrich, scope: "supersearch_enrichments:create", ask: true, for: "find and verify the leads in a batch (spends credits)", actions: [enrich_and_verify_leads] }
+    - { tool: inbox_placement_create, scope: "inbox_placement:create", verify: true, ask: true, for: "run an inbox placement test (sends test emails from your mailboxes)", actions: [run_inbox_placement_test] }
+    - { tool: create_lead, scope: "leads:create", ask: true, for: "add the one person a lead pointed to, only with an email from the thread", actions: [add_referred_lead] }
+    - { tool: add_leads_to_campaign_or_list_bulk, scope: "leads:create", ask: true, for: "add approved leads to a campaign", actions: [add_leads_to_campaign] }
+    - { tool: create_campaign, scope: "campaigns:create", ask: true, for: "create a campaign as a draft that sends nothing", actions: [create_campaign_draft] }
+    - { tool: update_campaign, scope: "campaigns:update", ask: true, for: "change schedule, limits or senders on a draft", actions: [update_campaign_settings] }
+    - { tool: activate_campaign, scope: "campaigns:update", ask: true, for: "start a campaign after the safety check passed", actions: [activate_campaign, resume_campaign] }
+    - { tool: pause_campaign, scope: "campaigns:update", ask: true, for: "stop a campaign when you say so", actions: [pause_campaign] }
+
+scale:
+  title: Scale access
+  summary: "Everything in working access, plus buying pre-warmed mailboxes and domains from Instantly. It shows a simulation first, then waits for you to type the exact words, and places one order at a time."
+  tools:
+    - { tool: dfy_orders_create, scope: "dfy_email_account_orders:create", verify: true, ask: true, for: "place a mailbox and domain order you confirmed (real money, billed monthly)", actions: [buy_domains_or_mailboxes] }
+
+# Tools that exist only while their feature switch (under `features`) is on.
+optional:
+  - { tool: accounts_pause, feature: mailbox_pause, tier: working, scope: "accounts:update", verify: true, ask: true, for: "pause one mailbox after you say yes to it", actions: [pause_or_resume_mailbox] }
+  - { tool: accounts_resume, feature: mailbox_pause, tier: working, scope: "accounts:update", verify: true, ask: true, for: "resume one paused mailbox after you say yes to it", actions: [pause_or_resume_mailbox] }
+
+# What `never` and `ask` rules in config/approvals.yaml forbid the Bot from doing through a tool.
+# Each `never` action must appear here (exact tool names, or a pattern in `match`). A rule that a tool cannot enforce is listed under rules_only.
+blocked:
+  delete_anything: { match: "delete", note: "every delete tool" }
+  connect_or_remove_mailbox: { tools: [create_account, delete_account] }
+  change_warmup_settings: { tools: [accounts_warmup_enable, accounts_warmup_disable, manage_account_state] }
+  placement_edits: { tools: [inbox_placement_update, inbox_placement_delete], note: "Changing or deleting a placement test is done in Instantly" }
+  cancel_orders: { tools: [dfy_orders_cancel], note: "Cancelling an order is done in Instantly, never by the Bot" }
+  change_passwords_billing_or_keys: { match: "^workspace_(billing|members|group_members|update|whitelabel)" }
+  forward_email: { tools: [email_forward] }
+  update_lead_or_account_fields: { tools: [update_lead, update_account, leads_merge, leads_bulk_assign, accounts_mark_fixed, update_lead_list, email_update] }
+  webhooks: { match: "^webhooks_", note: "A person sets up webhooks once; the Bot has no use for them" }
+rules_only:
+  edit_live_campaign_sequence: "update_campaign is allowed (it is how a schedule changes), and it can also edit steps. The Bot's rules, not Instantly, stop it from editing a live sequence."
+  share_data_across_clients: "A tool cannot tell which client a request is for."
+  send_via_other_mail_plugin: "Not an Instantly tool: the Bot must not send through any other mail app."
+  reply_to_sensitive: "Whether a reply is sensitive is a judgment, not a permission."
+  reply_to_no_reply_categories: "Same: a judgment the Bot makes before it ever calls reply_to_email."
+  edit_repo_config: "Not an Instantly tool: the Bot may not rewrite its own skills or rules."

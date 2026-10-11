@@ -47,13 +47,30 @@ Only the mailboxes listed in `workspace.yaml` count. Ignore every other mailbox 
 6. **Post only changes.** Compare with the last `mailbox_state` line in `logs/runs.md`. Post a card in the alerts channel
    (`templates/slack-cards.md`, Mailbox alert) only when a mailbox or campaign changed state. Always log the full state.
 
+## Deliverability watch (on demand, and in the digest)
+
+Wake: the owner asks "how is my deliverability?", or the digest runs. Read-only: it reports and suggests, it never changes anything (approval: read_mailbox_health).
+1. Read each client mailbox's warmup health, the campaigns' sending status and the last 7 days of bounces and spam placement, and run the DNS check on any domain that looks off.
+2. Tag what you find **good**, **watch** or **act**, with the numbers and one suggestion each. Use `templates/deliverability-card.md`.
+   - A bounce or spam uptick is a **watch** item: suggest resting the domain, lowering the daily volume, re-verifying the list or checking DNS. **Never pause anything on your own.**
+   - Bounce above the stop level, a failed DNS record, or a mailbox gone unhealthy is an **act** item: a person fixes it in Instantly. Say what and where.
+3. **Say honestly what the cause is.** If sender health is fine and replies are low, the cause is the copy or the audience: point at `/instantly-write-sequence`, and do not push more senders. If the senders are cold, unwarmed or unhealthy, say so, and mention capacity once. If there is not enough data, say "not enough data yet".
+
+## Inbox placement test
+
+Shows whether emails from the client's mailboxes land in the inbox or in spam.
+- **Reading** results is free and needs no card. It covers the tests, their inbox and spam counts over time, the blacklist and spam-filter reports, and the insights (approval: read_mailbox_health).
+- **Creating** a test sends test emails from the client's real mailboxes (approval: run_inbox_placement_test). Name the mailboxes and how many test emails go out, and wait for a yes. One test at a time. Never change or delete a test: a person does that in Instantly.
+- Show the result in plain words: inbox vs spam, which provider put it in spam, one suggestion. Use `templates/deliverability-card.md`.
+- Never run a placement test on a schedule or without the owner asking: it sends email.
+
 ## What changes in other skills
 
 - A reply must be sent from the mailbox that received it. If that mailbox is RED, the card says `BLOCKED: mailbox <x> needs reconnecting in Instantly`
   and no send is offered. Never send the reply from a different mailbox: the lead would see a different address in the thread.
 - Campaign launches and lead batches use only HEALTHY and WATCH mailboxes. All RED means a full stop and a plain explanation.
 - Capacity check: a healthy mailbox on a young domain carries about 20 to 30 cold sends a day. If planned volume needs more healthy mailboxes
-  than the client has, say so in the digest. Suggest warming more mailboxes, or pre-warmed accounts from Instantly. Never buy (approval: buy_domains_or_mailboxes).
+  than the client has, say so in the digest. Suggest warming more mailboxes, or offer `/instantly-sending-infrastructure` for pre-warmed accounts. Never buy on your own (approval: buy_domains_or_mailboxes).
 
 ## You never do these
 
@@ -210,6 +227,23 @@ I did not draft a reply and I will not. A person should read this now.
 
 ```
 {client} · stopped {lead email} ({unsubscribe | not interested}). No reply sent.
+```
+
+---
+
+## Reference: `templates/deliverability-card.md`
+
+### Deliverability card
+
+A short watch list. Each line is tagged **good**, **watch** or **act**, with the numbers and one suggestion. Nothing here changes anything on its own.
+
+```
+Deliverability · {client} · {date}
+• [good]  {n} of {m} mailboxes healthy · bounce {x.x%} · spam placement {y.y%}
+• [watch] {mailbox or domain}: {what moved, with the numbers}. Suggestion: {rest the domain | lower the daily volume | re-verify the list | check DNS}
+• [act]   {mailbox or domain}: {what is wrong, with the numbers}. A person does this in Instantly: {what and where}
+Cause: {senders | copy or audience | list quality | not enough data yet}, because {one line}
+Placement test: {last run date and inbox vs spam, or "none yet"}
 ```
 
 ---

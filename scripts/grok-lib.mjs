@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import YAML from 'yaml';
+import { loadAccess, checkAccess, renderTools, renderKeyScopes, renderAccessLevels, renderMailboxPauseNote, buildMcpFiles } from './grok-access.mjs';
 
 // Builds the Grok Bot skills from the Dot's source files, so there is one source of truth.
 //
@@ -15,7 +16,9 @@ import YAML from 'yaml';
 export const MANIFEST = 'grok/skills.yaml';
 const DATA_FILE_NAMES = new Set([
   'agency.yaml', 'workspace.yaml', 'icp.yaml', 'profile.md', 'voice.md', 'examples.md', 'learnings.md',
-  'runs.md', 'replies.md', 'pending.md', 'batches.md', 'experiments.md', 'removed-lessons.md', // the files in logs/
+  'runs.md', 'replies.md', 'pending.md', 'batches.md', 'experiments.md', 'removed-lessons.md', 'orders.md', // the files in logs/
+  'infra.md', // a client's sending-infrastructure answers
+  'routines.md', // the list of routines the owner has
 ]);
 const FILE_REF = /`([^`\s]+\.(?:md|ya?ml|mjs|json))`/g;
 const FORBIDDEN = [
@@ -28,6 +31,7 @@ const FORBIDDEN = [
   [/GitHub/, 'mentions GitHub'],
   [/\bnpm\b|\bnode scripts/, 'mentions npm or node scripts'],
   [/pull request/i, 'mentions a pull request'],
+  [/\{\{(approvals|tools|key_scopes|access_levels|mailbox_pause_note|skills|include)\b/, 'has a placeholder that was never filled in'],
 ];
 
 const headingLevel = (line) => {
@@ -103,7 +107,7 @@ function replaceAll(text, rule, where) {
 }
 
 // Renders config/approvals.yaml as three plain lists, keeping each action's comment.
-export function renderApprovals(text, commentOverrides = {}) {
+export function renderApprovals(text, commentOverrides = {}, levelOverrides = {}) {
   const groups = { auto: [], ask: [], never: [] };
   let inActions = false;
   for (const raw of text.split('\n')) {
@@ -114,7 +118,8 @@ export function renderApprovals(text, commentOverrides = {}) {
     if (!inActions) continue;
     const m = /^  ([a-z_]+):\s*(auto|ask|never)\s*(?:#\s*(.*))?$/.exec(raw);
     if (!m) continue;
-    const [, name, level, comment] = m;
+    const [, name, fileLevel, comment] = m;
+    const level = levelOverrides[name] ?? fileLevel;
     const note = name in commentOverrides ? commentOverrides[name] : comment;
     groups[level].push(note ? `- \`${name}\`: ${note}` : `- \`${name}\``);
   }
@@ -137,7 +142,7 @@ export function loadManifest(root) {
 // The owner's own files. `clients/_template/` is not: it holds the skeletons the Bot copies from, so it must be inlined.
 function isDataRef(ref) {
   if (ref.startsWith('clients/_template/')) return false;
-  return ref.startsWith('clients/') || ref.startsWith('logs/') || ref === 'config/agency.yaml' || DATA_FILE_NAMES.has(ref);
+  return ref.startsWith('clients/') || ref.startsWith('logs/') || ref === 'config/agency.yaml' || ref === 'config/routines.md' || DATA_FILE_NAMES.has(ref);
 }
 
 export function buildAll(root) {
@@ -148,23 +153,51 @@ export function buildAll(root) {
   for (const s of manifest.skills) if (s.source.startsWith('playbooks/')) skillSlash[path.basename(s.source)] = `/${s.name}`;
   const overrides = manifest.overrides ?? {};
   const globalRules = (manifest.replace ?? []).map((r) => ({ required: false, ...r }));
+  const access = loadAccess(root);
+  for (const e of checkAccess(root, access)) errors.push(e);
+
+  // Includes and placeholders that are generated from other files. Applied before AND after the per-file overrides, because an override may bring its own.
+  //   {{include FILE "## Heading"}}        the section, heading included
+  //   {{include FILE "## Heading" body}}   the section's text without its heading line
+  const fillOnce = (t) =>
+    t
+      .replace(/\{\{include (\S+) "([^"]+)"( body)?\}\}/g, (_, file, heading, body) => {
+        const section = extractSection(rd(file), heading);
+        return body ? section.split('\n').slice(1).join('\n').replace(/^\n+/, '') : section;
+      })
+      .replace(/\{\{approvals\}\}/g, () => renderApprovals(rd('config/approvals.yaml'), manifest.approvals_comments ?? {}, manifest.approvals_overrides ?? {}))
+      .replace(/\{\{mailbox_pause_note\}\}/g, () => renderMailboxPauseNote(access))
+      .replace(/\{\{tools\}\}/g, () => renderTools(access))
+      .replace(/\{\{key_scopes\}\}/g, () => renderKeyScopes(access))
+      .replace(/\{\{access_levels\}\}/g, () => renderAccessLevels(access))
+      .replace(/\{\{skills\}\}/g, () =>
+        ['| Skill | Use it when |', '|---|---|', ...manifest.skills.map((s) => `| \`/${s.name}\` | ${s.when} |`)].join('\n'),
+      );
+  // An include may itself contain an include or a placeholder, so repeat until nothing changes (at most three times).
+  const fill = (t) => {
+    for (let i = 0; i < 3; i++) {
+      const next = fillOnce(t);
+      if (next === t) break;
+      t = next;
+    }
+    return t;
+  };
 
   // Apply everything that is declared for one source file, in a fixed order.
   function process(rel, textIn, where) {
     const own = overrides[rel] ?? {};
     let text = own.replace_file ? rd(own.replace_file) : textIn;
-    // 1. includes
-    text = text.replace(/\{\{include (\S+) "([^"]+)"\}\}/g, (_, file, heading) => extractSection(rd(file), heading));
-    text = text.replace(/\{\{approvals\}\}/g, () => renderApprovals(rd('config/approvals.yaml'), manifest.approvals_comments ?? {}));
-    text = text.replace(
-      /\{\{skills\}\}/g,
-      () =>
-        ['| Skill | Use it when |', '|---|---|', ...manifest.skills.map((s) => `| \`/${s.name}\` | ${s.when} |`)].join('\n'),
-    );
+    // 1. includes and generated placeholders
+    text = fill(text);
     // 2. per-file overrides
     const o = overrides[rel] ?? {};
-    for (const [heading, file] of Object.entries(o.replace_sections ?? {})) text = replaceSection(text, heading, rd(file));
+    for (const [heading, file] of Object.entries(o.replace_sections ?? {})) {
+      // a section override is a file, or { flag, on, off }: the file used depends on `features.<flag>` in the manifest
+      const chosen = typeof file === 'string' ? file : (manifest.features?.[file.flag] ? file.on : file.off);
+      text = replaceSection(text, heading, rd(chosen));
+    }
     for (const rule of o.replace_text ?? []) text = replaceAll(text, { required: true, ...rule }, `${where} (${rel})`);
+    text = fill(text);
     // 3. global rules
     for (const rule of globalRules) text = replaceAll(text, rule, where);
     // 4. cross references to other playbooks
@@ -177,7 +210,7 @@ export function buildAll(root) {
     return text;
   }
 
-  const files = {};
+  const files = { ...buildMcpFiles(access) }; // the plugin's connection configs, with the tool allowlist
   for (const skill of manifest.skills) {
     const where = `skill ${skill.name}`;
     try {

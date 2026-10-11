@@ -123,7 +123,7 @@ Use a test workspace for a first try.
 | `templates/` | Cards, digest, weekly report, meeting brief, radar |
 | `clients/_template/` | The skeleton for one client: workspace, ICP, voice, examples, lessons, logs |
 | `relay/` | Instantly webhook → Slack relay (Cloudflare Worker), with tests |
-| `grok/` | The same teammate for **Grok Bot**: 14 skills generated from the playbooks, a one-message bootstrap, the Bot's profile and a Cursor-format plugin. Start at `grok/README.md` |
+| `grok/` | The same teammate for **Grok Bot**: skills generated from the playbooks, a one-message bootstrap, the Bot's profile and a Cursor-format plugin. Start at `grok/README.md` |
 | `scripts/` | The setup wizard, the validator, the relay route and webhook builder, and the Grok skill generator |
 | `setup/` | Install, add a client, relay, Phase 0 checks, self-check, Custom Rules, scoped keys, bootstrap prompts, tool map |
 

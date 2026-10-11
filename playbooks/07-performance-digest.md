@@ -51,7 +51,7 @@ Rank campaigns by positive-reply rate. For a clear winner, suggest scaling: more
 ## Include in the digest
 
 Replies handled, meetings booked, median minutes from reply to card, edit rate vs last week (`10-learning-loop.md`), mailbox states (HEALTHY, WATCH, RED counts),
-credits used and left, anything blocked. Use `templates/daily-digest.md`. Post in the client's reports channel. Post counts only to the agency digest channel.
+credits used and left, anything blocked. Use `templates/daily-digest.md`. Start with its **brief**: a few lines, each tagged **needs you**, **good** or **watch** with one suggestion, and end with one question. A deliverability worry is a watch item with a suggestion (rest the domain, lower the daily volume): never an automatic pause. Post in the client's reports channel. Post counts only to the agency digest channel.
 
 ## Edge cases
 

@@ -19,6 +19,7 @@ if (errors.length) {
 
 const outDir = path.join(root, manifest.output_dir);
 const wanted = new Set(Object.keys(files));
+const skillCount = [...wanted].filter((f) => f.startsWith(`${manifest.output_dir}/`)).length;
 const stale = fs.existsSync(outDir)
   ? fs.readdirSync(outDir, { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => `${manifest.output_dir}/${d.name}/SKILL.md`).filter((f) => !wanted.has(f))
   : [];
@@ -35,7 +36,7 @@ if (check) {
     console.error(out.map((o) => `error    ${o}`).join('\n') + '\n\nRun `npm run build:grok` and commit the result.');
     process.exit(1);
   }
-  console.log(`ok: ${wanted.size} Grok skills are up to date`);
+  console.log(`ok: ${skillCount} Grok skills and ${wanted.size - skillCount} plugin configs are up to date`);
 } else {
   for (const [rel, text] of Object.entries(files)) {
     fs.mkdirSync(path.dirname(path.join(root, rel)), { recursive: true });
@@ -43,5 +44,5 @@ if (check) {
   }
   for (const s of stale) fs.rmSync(path.dirname(path.join(root, s)), { recursive: true, force: true });
   for (const [rel, text] of Object.entries(files)) console.log(`${String(text.split('\n').length).padStart(5)} lines  ${rel}`);
-  console.log(`\nwrote ${wanted.size} skills${stale.length ? `, removed ${stale.length} stale` : ''}`);
+  console.log(`\nwrote ${skillCount} skills and ${wanted.size - skillCount} plugin configs${stale.length ? `, removed ${stale.length} stale` : ''}`);
 }

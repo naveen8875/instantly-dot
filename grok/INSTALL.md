@@ -10,16 +10,23 @@ This file is for the Bot (and for a person doing it by hand). Do these in order.
 
 ## 2. Install the skills
 
-There are 14 folders in `grok/plugin/skills/`. For each one:
+Count the folders in `grok/plugin/skills/` (call the number N). **Do this yourself, in this conversation.** Do not hand it to a background helper or another agent: it may not be allowed to save skills, and then it saves nothing and may not tell you.
+
+For each folder:
 
 1. Read its `SKILL.md`.
 2. Save it as a skill whose **name** is the folder name (for example `instantly-inbox`), whose **description** is the `description` line at the top, and whose **instructions** are everything after the first block between `---` lines. Copy the text exactly. Do not summarise, shorten or "improve" it.
-3. If you cannot create a skill from a file, create it from the text: say "Save this as a skill called `<name>`:" and paste the instructions.
+3. **Read it back** and compare it with the original. A skill only counts as installed once what you read back matches.
+4. If saving fails, try the next way, in this order: save it with your own skill-saving ability; write the file into your skills folder; or create it from the text (say "Save this as a skill called `<name>`:" and paste the instructions). Note which way worked and use it for the rest.
 
-Install `instantly-operating-rules` and `instantly-voice-rules` first. When you are done, check that typing `/` lists all 14.
+Install `instantly-operating-rules` and `instantly-voice-rules` first.
+
+When all N match, **do not say you are done yet**. Your own skill list may not refresh until later, so you cannot check it yourself. Ask the owner: "Please type `/instantly` and tell me how many skills you see. There should be N." If fewer show, say which are missing, and install those again.
 If any failed, tell the owner which ones, in plain words, and why.
 
 ## 3. Do not do these yet
+
+If the owner said **install only**, stop after step 2: do not greet, do not connect anything, do not run setup, and tell them the skills are installed.
 
 - Do not create any routine.
 - Do not connect anything. `/instantly-setup` tells the owner what to connect.
@@ -27,14 +34,15 @@ If any failed, tell the owner which ones, in plain words, and why.
 
 ## 4. Start
 
-Run `/instantly-setup`.
+Greet the owner the way the operating rules say ("First conversation"), then run `/instantly-setup`.
 
 ## By hand (no repo access)
 
 1. Open each `grok/plugin/skills/<name>/SKILL.md` on GitHub and copy the whole file.
-2. In the Bot, type: `Save this as a skill called <name>:` and paste it. Repeat for all 14. Start with the two rules skills.
+2. In the Bot, type: `Save this as a skill called <name>:` and paste it. Repeat for every folder. Start with the two rules skills.
 3. Paste the profile fields from `grok/bot/profile.md` into **Edit Profile**.
-4. Type `/instantly-setup`.
+4. Type `/instantly` and count: you should see one for every folder in `grok/plugin/skills/`.
+5. Type `/instantly-setup`.
 
 ## Keeping it current
 

@@ -33,7 +33,7 @@ Editing a live campaign's sequence is never yours (approval: edit_live_campaign_
 
 1. Read the campaign back: status 0, leads attached, a sequence present.
 2. Mailbox preflight: every attached mailbox through `/instantly-mailbox-health`.
-   Any RED: refuse and name the mailbox and the reason. All cold: full stop plus warmup guidance.
+   Any RED: refuse and name the mailbox and the reason. All cold: full stop plus warmup guidance. If the healthy senders are too few for this launch, or all are cold, offer `/instantly-sending-infrastructure` once.
    Options for the human: drop that sender, wait for warmup, fix it in Instantly.
 3. Verify re-check: verification stats on the source list. Any unverified row in the send set: stop.
 4. Spam scan of every subject and body (`voice/tone.md`). Surface anything flagged on the card.

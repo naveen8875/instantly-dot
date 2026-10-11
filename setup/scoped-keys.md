@@ -34,6 +34,7 @@ Note that a wrong or revoked key can still say "connected", because the server o
 | `lead-labels:read`, `lead-labels:create` | Labels (Instantly's docs write `lead-labels`, with a hyphen) |
 | `campaigns:read`, `campaigns:create`, `campaigns:update` | Create drafts, activate, pause. `update` also permits sequence edits |
 | `accounts:read` | Mailbox health. **Withhold `accounts:update`** so the Dot cannot pause, resume or change warmup |
+| `workspaces:read`, `background_jobs:read` | The workspace check, and checking that a queued change (a status, a lead import) finished. Instantly's docs do not say whether a key without `all:read` needs these, so confirm them in the test below |
 | `block_list_entries:read`, `block_list_entries:create` | Stop unsubscribers |
 | `email_verifications:read`, `email_verifications:create` | Verification |
 | `supersearch_enrichments:read`, `supersearch_enrichments:create` | Count, preview, enrich |

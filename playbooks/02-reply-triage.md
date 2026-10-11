@@ -26,6 +26,10 @@ Input: one or more `email_id` values. Each is the Instantly id of the message to
    | interested | Set status 1. Run `03-slot-offer-and-booking.md`. |
    | question, objection, not_now, referral | Draft a reply (step 6). |
 
+   **Referral.** After drafting, offer once to add the person they named as a lead in the same campaign (approval: add_referred_lead).
+   Use only an email address that appears in the thread. If you only have a name, say so on the card and do not guess an address: the owner can ask you to look the person up with a verified search (approval: enrich_and_verify_leads).
+   Say where the name came from ("<lead> pointed to <name> in their reply").
+
    Set statuses only if `instantly.dot_sets_interest_status` is `true` in `workspace.yaml`.
    Status writes are queued by Instantly. Say "queued", never "done".
 6. **Draft.**
@@ -45,6 +49,7 @@ Input: one or more `email_id` values. Each is the Instantly id of the message to
       (or send_reply_interested for a non-slot answer to an interested lead).
    3. Mark the thread read (approval: mark_thread_read). Update `logs/pending.md`, `logs/replies.md`.
    4. If the human edited the text, run `10-learning-loop.md`.
+   5. If the card offered a referral lead and the human said yes to it, create that one lead in the same campaign, with the email from the thread, and note in `logs/replies.md` who referred them. Never add them to any other campaign.
 9. **Limits.** Send at most `limits.max_replies_sent_per_run` per run. The rest wait for the next run.
 10. **Speed.** Record the minutes from the lead's reply to the card being posted. If it is over 60, say so in the digest.
 

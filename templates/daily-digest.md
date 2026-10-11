@@ -1,6 +1,12 @@
 # Daily digest (08:00 weekdays, client reports channel)
 
 ```
+{Weekday} brief · {client} · {date}
+• [needs you] {N} replies waiting, {M} look interested, drafts ready
+• [good]      positive-reply rate holding at {x.xx%}
+• [watch]     {one line, with one suggestion}
+→ Want me to handle the {N} replies? (nothing is sent without your yes)
+
 {client} · {date}
 
 POSITIVE-REPLY RATE (7 days): {x.xx%} · target {y.yy%} · last week {z.zz%}

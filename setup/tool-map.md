@@ -33,10 +33,13 @@ Base URL `https://api.instantly.ai/api/v2`. Workspace-wide limits: 100 requests 
 | enrich | 04 | SuperSearch enrich-leads (spends credits) | write | |
 | verify_stats | 04 | `GET /lead-lists/{id}/verification-stats` | read | |
 | add_leads | 04, 06 | `POST /leads/add` (up to 1,000 per call, skip if in campaign) | write | |
+| create_lead | 02 (referral) | `POST /leads` (one lead, with the email from the thread) | write | |
 | list_leads / get_lead | 08, 09 | `POST /leads/list`, `GET /leads/{id}` | read | |
 | create_campaign | 06 | `POST /campaigns` (always created as a draft) | write | |
 | update_campaign | 06 | `PATCH /campaigns/{id}` | write | |
 | activate | 06 | `POST /campaigns/{id}/activate` | write | |
+| placement_read | 01 | `GET /inbox-placement-tests`, `/inbox-placement-analytics`, `/inbox-placement-blacklist-and-spam-assassin-reports` and the ESP options | read | |
+| placement_create | 01 | `POST /inbox-placement-tests` (sends test emails from the client's mailboxes) | write | |
 | account_pause / account_resume | 01 (card only) | `POST /accounts/{email}/pause`, `/resume` | write | |
 | webhooks (create, list, test) | setup/relay.md | `POST /webhooks`, `GET /webhooks`, `POST /webhooks/{id}/test` | admin | |
 
