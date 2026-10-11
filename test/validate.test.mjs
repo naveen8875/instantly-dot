@@ -260,9 +260,37 @@ test('a segment may leave search_filters empty if plain_language says who to rea
   assert.ok(has(validateRepo(bad.root), 'needs search_filters, or a plain_language description'));
 });
 
-test('interface is required and must be chatgpt or slack', () => {
+test('interface is required and must be chat, chatgpt or slack', () => {
   const { root } = makeRepo({ tweak: ({ yaml }) => yaml('config/agency.yaml', (d) => delete d.interface) });
-  assert.ok(has(validateRepo(root), 'interface must be one of chatgpt, slack'));
+  assert.ok(has(validateRepo(root), 'interface must be one of chat, chatgpt, slack'));
+  const bad = makeRepo({ tweak: ({ yaml }) => yaml('config/agency.yaml', (d) => (d.interface = 'telegram')) });
+  assert.ok(has(validateRepo(bad.root), 'interface must be one of chat, chatgpt, slack'));
+});
+
+test('interface chat (the Grok Bot) needs no Slack, no relay and no repo, and cannot use the Slack event wake', () => {
+  const { root } = makeRepo({
+    tweak: ({ yaml }) => {
+      yaml('config/agency.yaml', (d) => {
+        d.interface = 'chat';
+        delete d.agency.channels;
+        delete d.agency.owner.slack_user;
+        delete d.agency.repo;
+        d.agency.approvers = [{ name: 'Owner' }];
+        delete d.slack;
+      });
+      for (const c of ['acme-co', 'globex']) yaml(`clients/${c}/workspace.yaml`, (d) => delete d.slack);
+    },
+  });
+  assert.deepEqual(validateRepo(root).errors, []);
+  const wake = makeRepo({ tweak: ({ yaml }) => yaml('config/agency.yaml', (d) => { d.interface = 'chat'; d.wake.primary = 'slack_event'; }) });
+  assert.ok(has(validateRepo(wake.root), 'slack_event needs interface slack'));
+});
+
+test('agency.repo is optional, but if present it must look like owner/name', () => {
+  const none = makeRepo({ tweak: ({ yaml }) => yaml('config/agency.yaml', (d) => delete d.agency.repo) });
+  assert.deepEqual(validateRepo(none.root).errors, []);
+  const bad = makeRepo({ tweak: ({ yaml }) => yaml('config/agency.yaml', (d) => (d.agency.repo = 'not a repo')) });
+  assert.ok(has(validateRepo(bad.root), 'agency.repo must look like owner/name'));
 });
 
 test('interface chatgpt needs no Slack handles, channels or relay', () => {

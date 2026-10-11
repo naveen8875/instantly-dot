@@ -1,0 +1,32 @@
+# REPLACE_ME: fill every value, then delete this comment line.
+# The Bot writes this file for the owner during setup. Nothing here needs to be edited by hand.
+
+interface: "chat"                   # you approve things in this chat
+
+agency:
+  name: "REPLACE_ME"
+  timezone: "REPLACE_ME"            # IANA name, e.g. "America/New_York"
+  owner:
+    name: "REPLACE_ME"
+  approvers:                        # people whose Send / Edit / Skip you accept
+    - name: "REPLACE_ME"
+
+canary: "v1"                        # bump when the skills are replaced by a newer template, so the run log shows which version ran
+
+mode: dry_run                       # dry_run (practice mode) | live | paused (paused stops every client)
+
+quiet_hours:
+  from: "22:00"
+  to: "07:00"                       # nothing is posted or sent in this window
+
+wake:
+  primary: "schedule_only"          # the Bot only works when asked, or on a routine the owner turned on
+  backup_poll_minutes: 60
+
+fallbacks:
+  allow_browser_fallback: true
+  allow_zapier_fallback: false
+
+clients:
+  - folder: "REPLACE_ME"            # folder name under clients/
+    active: true

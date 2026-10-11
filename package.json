@@ -9,6 +9,8 @@
     "init": "node scripts/init.mjs",
     "validate": "node scripts/validate.mjs",
     "test": "node --test",
+    "build:grok": "node scripts/build-grok.mjs",
+    "check:grok": "node scripts/build-grok.mjs --check",
     "relay:routes": "node scripts/build-relay-routes.mjs"
   },
   "dependencies": {

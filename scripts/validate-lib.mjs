@@ -33,7 +33,7 @@ export const HARD_ASK = [
 const LEVELS = ['auto', 'ask', 'never'];
 const MODES = ['dry_run', 'live', 'paused'];
 const WAKE = ['schedule_only', 'slack_event'];
-const INTERFACES = ['chatgpt', 'slack'];
+const INTERFACES = ['chat', 'chatgpt', 'slack']; // chat = approve in the conversation with the agent (chatgpt is the older name for the same thing)
 const EXAMPLE_SECTIONS = [
   'interested',
   'how it works',
@@ -171,8 +171,8 @@ export function validateRepo(root, opts = {}) {
     const a = doc.agency ?? {};
     if (!nonEmpty(a.name)) err(f, 'agency.name is required');
     if (!validTimezone(a.timezone)) err(f, `agency.timezone "${a.timezone}" is not a valid IANA timezone`);
-    if (!nonEmpty(a.repo) || !/^[^/\s]+\/[^/\s]+$/.test(a.repo)) err(f, 'agency.repo must look like owner/name');
-    if (!INTERFACES.includes(doc.interface)) err(f, `interface must be one of ${INTERFACES.join(', ')} (chatgpt: approvals in the Dot's ChatGPT chat, no Slack; slack: approvals in Slack channels)`);
+    if (a.repo !== undefined && (!nonEmpty(a.repo) || !/^[^/\s]+\/[^/\s]+$/.test(a.repo))) err(f, 'agency.repo must look like owner/name (it is optional)');
+    if (!INTERFACES.includes(doc.interface)) err(f, `interface must be one of ${INTERFACES.join(', ')} (chat: approvals in the conversation, no Slack; slack: approvals in Slack channels)`);
     const slackMode = doc.interface === 'slack';
     if (!nonEmpty(a.owner?.name)) err(f, 'agency.owner.name is required');
     if (slackMode && !nonEmpty(a.owner?.slack_user)) err(f, 'agency.owner.slack_user is required when interface is slack');
@@ -187,7 +187,7 @@ export function validateRepo(root, opts = {}) {
     if (!MODES.includes(doc.mode)) err(f, `mode must be one of ${MODES.join(', ')}`);
     if (!HHMM.test(doc.quiet_hours?.from ?? '') || !HHMM.test(doc.quiet_hours?.to ?? '')) err(f, 'quiet_hours.from and .to must be HH:MM');
     if (!WAKE.includes(doc.wake?.primary)) err(f, `wake.primary must be one of ${WAKE.join(', ')}`);
-    else if (doc.interface === 'chatgpt' && doc.wake.primary === 'slack_event') err(f, 'wake.primary slack_event needs interface slack: the event wake is a Slack channel trigger');
+    else if ((doc.interface === 'chatgpt' || doc.interface === 'chat') && doc.wake.primary === 'slack_event') err(f, 'wake.primary slack_event needs interface slack: the event wake is a Slack channel trigger');
     if (!Array.isArray(doc.clients) || doc.clients.length === 0) {
       err(f, 'clients is empty: add your first client (setup/add-client.md)');
     } else {

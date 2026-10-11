@@ -123,7 +123,8 @@ Use a test workspace for a first try.
 | `templates/` | Cards, digest, weekly report, meeting brief, radar |
 | `clients/_template/` | The skeleton for one client: workspace, ICP, voice, examples, lessons, logs |
 | `relay/` | Instantly webhook → Slack relay (Cloudflare Worker), with tests |
-| `scripts/` | The setup wizard, the validator, the relay route and webhook builder |
+| `grok/` | The same teammate for **Grok Bot**: 14 skills generated from the playbooks, a one-message bootstrap, the Bot's profile and a Cursor-format plugin. Start at `grok/README.md` |
+| `scripts/` | The setup wizard, the validator, the relay route and webhook builder, and the Grok skill generator |
 | `setup/` | Install, add a client, relay, Phase 0 checks, self-check, Custom Rules, scoped keys, bootstrap prompts, tool map |
 
 ```bash
@@ -131,6 +132,7 @@ npm install
 npm test            # validator, wizard, onboarding, docs and relay tests
 npm run init        # setup wizard (optional)
 npm run validate    # check your config; add --data <folder> if it lives elsewhere
+npm run build:grok  # regenerate the Grok Bot skills after changing a playbook (check:grok fails if they are out of date)
 ```
 
 ## Built from

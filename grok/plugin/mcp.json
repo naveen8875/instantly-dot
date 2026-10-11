@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "instantly": {
+      "url": "https://mcp.instantly.ai/mcp",
+      "headers": {
+        "Authorization": "Bearer ${INSTANTLY_API_KEY}"
+      }
+    }
+  }
+}

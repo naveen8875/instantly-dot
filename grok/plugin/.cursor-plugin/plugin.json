@@ -1,0 +1,20 @@
+{
+  "name": "instantly-bot",
+  "description": "An outbound teammate for Instantly: sorts replies, drafts answers, finds leads, writes sequences and reports. Drafts first and asks before anything is sent or spent.",
+  "version": "0.1.0",
+  "author": { "name": "naveen8875" },
+  "homepage": "https://github.com/naveen8875/instantly-dot",
+  "repository": "https://github.com/naveen8875/instantly-dot",
+  "keywords": ["instantly", "cold-email", "outbound", "sales", "email"],
+  "variables": {
+    "type": "object",
+    "properties": {
+      "INSTANTLY_API_KEY": {
+        "type": "string",
+        "title": "Instantly API key",
+        "description": "An Instantly API v2 key. For a first try use a read-only key (scope all:read). Create it at app.instantly.ai/app/settings/integrations, API Keys."
+      }
+    },
+    "required": ["INSTANTLY_API_KEY"]
+  }
+}

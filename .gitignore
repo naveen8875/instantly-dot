@@ -5,3 +5,7 @@ relay/.env
 
 # Internal notes: research, capability report and the maintainer guide. Not part of the public repo.
 docs/internal/
+
+# Research notes and reports from deep-research runs. Local only.
+research_notes/
+reports/
